@@ -1,6 +1,6 @@
 # Spelling World
 
-A free spelling game for kids of every level, live at https://spelling.page
+A free spelling game for kids of every level, live at https://spelling.world
 
 - 20 levels of steadily harder words across five worlds
 - Win animals and scenery for each world by spelling words correctly
