@@ -32,8 +32,9 @@
   button { cursor: pointer; border: none; background: none; touch-action: manipulation; }
   :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
-  .app { position: relative; width: 100%; max-width: 620px; padding: 14px 16px 40px; display: flex; flex-direction: column; }
-  .screen { display: none; flex-direction: column; gap: 14px; }
+  .app { position: relative; width: 100%; max-width: 1120px; padding: 14px 16px 40px; display: flex; flex-direction: column; }
+  .screen { display: none; flex-direction: column; gap: 14px; width: 100%; margin: 0 auto; }
+  #profiles, #game, #results { max-width: 620px; }
   .screen.active { display: flex; animation: screenIn 0.3s ease; }
   @keyframes screenIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
@@ -117,8 +118,28 @@
   .tab.locked { color: var(--soft); }
   .tab .cnt { color: var(--soft); }
 
-  .scene-card { padding: 10px; }
-  .scene { position: relative; width: 100%; aspect-ratio: 5 / 3; border-radius: 20px; overflow: hidden; isolation: isolate; user-select: none; -webkit-user-select: none; background: var(--alt); }
+  .scene-card { padding: 8px; }
+  .scene { position: relative; width: 100%; aspect-ratio: 5 / 3; border-radius: 22px; overflow: hidden; isolation: isolate; user-select: none; -webkit-user-select: none; background: var(--alt); }
+  @media (max-width: 599px) { .scene-card { margin: 0 -10px; padding: 6px; border-radius: 24px; } .scene { border-radius: 18px; aspect-ratio: 4 / 3; } }
+  /* big screens: the world fills the rest of the window */
+  @media (min-width: 900px) {
+    .scene { aspect-ratio: auto; height: clamp(380px, calc(100vh - 300px), 680px); }
+    .level-card .play-inline { display: block; }
+    .home-top .play-row { display: none; }
+  }
+  .play-inline { display: none; margin-left: 8px; }
+  .scene-btn { position: absolute; z-index: 6; width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.88); box-shadow: 0 3px 10px rgba(0,0,0,0.15); font-size: 1.2rem; font-weight: 900; display: grid; place-items: center; color: #3A2E5C; }
+  .full-btn { right: 10px; top: 10px; }
+  .treat-hud { position: absolute; z-index: 6; left: 10px; top: 10px; background: rgba(255,255,255,0.9); border-radius: 999px; padding: 6px 12px; font-weight: 900; font-size: 1rem; box-shadow: 0 3px 10px rgba(0,0,0,0.15); color: #3A2E5C; }
+  .treat-hud.bump { animation: starPop 0.4s ease; }
+  .scene-tip { position: absolute; z-index: 6; left: 50%; bottom: 10px; transform: translateX(-50%); background: rgba(58,46,92,0.78); color: #fff; font-weight: 800; font-size: 0.82rem; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none; transition: opacity 0.6s; }
+  .scene-tip.gone { opacity: 0; }
+  .turn-tip { display: none; }
+  /* full screen world */
+  .scene-card.full { position: fixed; inset: 0; z-index: 700; margin: 0; padding: 0; border-radius: 0; background: #1d1733; display: flex; align-items: center; justify-content: center; }
+  .scene-card.full .scene { width: min(100vw, calc(100dvh * 5 / 3)); height: min(100dvh, calc(100vw * 3 / 5)); aspect-ratio: auto; border-radius: 0; }
+  .scene-card.full > :not(.scene) { display: none; }
+  @media (orientation: portrait) { .scene-card.full .turn-tip { display: block; position: fixed; left: 0; right: 0; bottom: 24px; text-align: center; color: #fff; font-weight: 800; } }
   .scene svg.land { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .scene.locked svg.land { filter: grayscale(0.9) brightness(0.8); }
   .critters { position: absolute; inset: 0; z-index: 2; }
@@ -203,7 +224,45 @@
   .combo { font-weight: 900; font-size: 0.95rem; min-width: 46px; text-align: right; opacity: 0; transition: opacity 0.2s; }
   .combo.on { opacity: 1; animation: starPop 0.4s ease; }
 
-  .q-card { position: relative; text-align: center; padding: 16px 14px 14px; border-radius: 30px; }
+  /* the trail: your explorer walks towards the prize as you spell */
+  .trail { position: relative; flex: 1; display: flex; align-items: flex-end; height: 50px; padding: 0 4px; }
+  .trail .cell { flex: 1; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 4px; }
+  .trail .st { width: 16px; height: 10px; border-radius: 50%; background: rgba(58,46,92,0.16); transition: background 0.3s, transform 0.3s; }
+  .trail .st.first { background: var(--green); } .trail .st.ok { background: var(--yellow); } .trail .st.miss { background: var(--coral); }
+  .trail .st.gold { background: linear-gradient(135deg, #FFE27A, #FFB800); box-shadow: 0 0 0 2px #FFD23F55; transform: scale(1.25); }
+  .trail .st.gold.first, .trail .st.gold.ok { background: #FFB800; }
+  .trail .prize-box { font-size: 1.5rem; line-height: 1; transform-origin: 50% 100%; animation: giftShake 2.4s ease-in-out infinite; }
+  .trail .walker { position: absolute; bottom: 12px; font-size: 1.7rem; line-height: 1; transform: translateX(-50%); transition: left 0.55s cubic-bezier(.4,1.4,.5,1); z-index: 2; }
+  .trail .walker.hop { animation: walkerHop 0.55s ease; }
+  @keyframes walkerHop { 0%,100% { transform: translate(-50%,0); } 45% { transform: translate(-50%,-16px) rotate(-8deg); } }
+  .q-card { position: relative; text-align: center; padding: 16px 14px 14px; border-radius: 30px; transition: box-shadow 0.4s, background 0.4s; }
+  .q-card.golden { background: linear-gradient(160deg, #FFF6CC, #FFFFFF 55%); box-shadow: 0 0 0 4px #FFD23F, var(--shadow); }
+  .gold-tag { display: inline-block; background: linear-gradient(90deg, #FFB800, #FFD23F); color: #5A3E00; font-weight: 900; font-size: 0.78rem; padding: 4px 10px; border-radius: 999px; margin-bottom: 6px; animation: tagBob 1s ease-in-out infinite; }
+  .buddy { position: absolute; right: 12px; top: 10px; font-size: 2.4rem; line-height: 1; transform-origin: 50% 100%; animation: breathe 3s ease-in-out infinite; pointer-events: none; }
+  .buddy.cheer { animation: bigjump 0.7s cubic-bezier(.3,1.6,.5,1) 2; }
+  .buddy.sad { animation: sadTilt 0.9s ease; }
+  .buddy.think { animation: think 1s ease; }
+  @keyframes sadTilt { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-14deg) translateY(4px); } 60% { transform: rotate(10deg) translateY(4px); } }
+  @keyframes think { 0%,100% { transform: rotate(0); } 50% { transform: rotate(12deg) scale(1.08); } }
+  .slots.win .s { animation: wave 0.55s ease calc(var(--i) * 55ms); }
+  @keyframes wave { 0%,100% { transform: translateY(-3px); } 40% { transform: translateY(-18px) scale(1.12); } }
+  .slots .s.justin { animation: slotIn 0.22s ease; }
+  @keyframes slotIn { from { transform: translateY(-3px) scale(1.25); } to { transform: translateY(-3px) scale(1); } }
+  .float-txt { position: fixed; z-index: 950; pointer-events: none; font-weight: 900; font-size: 1.5rem; color: var(--green-d); text-shadow: 0 2px 0 #fff, 0 0 12px #fff; transform: translate(-50%, 0); animation: floatUp 1.3s ease-out forwards; white-space: nowrap; }
+  @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.6); } 20% { opacity: 1; transform: translate(-50%, -6px) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -70px) scale(1); } }
+  .fx { position: fixed; z-index: 950; pointer-events: none; font-size: 1.3rem; animation: sparkle 0.9s ease-out forwards; }
+  .banner { position: fixed; left: 50%; top: 38%; z-index: 960; pointer-events: none; transform: translate(-50%,-50%); font-weight: 900; font-size: clamp(1.8rem, 8vw, 3rem); color: #fff; background: linear-gradient(120deg, #FF6B6B, #FF9F43, #FFC93C); padding: 12px 26px; border-radius: 24px; box-shadow: 0 10px 30px rgba(255,107,107,0.4); animation: bannerIn 1.6s cubic-bezier(.3,1.5,.5,1) forwards; white-space: nowrap; }
+  @keyframes bannerIn { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.3) rotate(-8deg); } 18% { opacity: 1; transform: translate(-50%,-50%) scale(1.1) rotate(2deg); } 30% { transform: translate(-50%,-50%) scale(1) rotate(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-80%) scale(0.95); } }
+  .critter .crown { position: absolute; left: 50%; bottom: calc(var(--sz) * 0.95); transform: translateX(-50%); font-size: calc(var(--sz) * 0.35); pointer-events: none; }
+  .critter.talk .crown { opacity: 0; }
+  .critter.eat .body { animation: chomp 0.25s ease-in-out 4; }
+  @keyframes chomp { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.08,0.9); } }
+  .treat-drop { position: absolute; z-index: 500; pointer-events: none; font-size: 1.6rem; animation: treatDrop 0.55s cubic-bezier(.5,0,.8,.6) forwards; }
+  @keyframes treatDrop { from { transform: translate(-50%, -80px) scale(1.2); opacity: 0.2; } 70% { opacity: 1; } to { transform: translate(-50%, 0) scale(0.5); opacity: 0; } }
+  .collection .slot { position: relative; }
+  .collection .slot .bf { position: absolute; top: -6px; right: -4px; font-size: 1rem; }
+  .res .earned { margin: 12px auto 0; max-width: 400px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .res .earned span { background: #FFF3C4; border-radius: 999px; padding: 6px 12px; font-weight: 900; font-size: 0.95rem; }
   .q-pic { font-size: 5.2rem; line-height: 1.1; display: inline-block; animation: pop 0.4s cubic-bezier(.3,1.5,.5,1); }
   .q-pic.happy { animation: happy 0.7s ease; }
   .q-pic.speaker { width: 96px; height: 96px; border-radius: 50%; background: var(--alt); font-size: 2.8rem; display: inline-grid; place-items: center; box-shadow: 0 5px 0 rgba(58,46,92,0.12); }
@@ -338,7 +397,7 @@
 
   <!-- HOME -->
   <main id="home" class="screen">
-    <section class="card">
+    <section class="card home-top">
       <div class="level-card">
         <div class="lvl-badge"><div><small>LEVEL</small><b id="lvlNum">1</b></div></div>
         <div class="mid">
@@ -347,14 +406,20 @@
           <div class="sub" id="lvlSub"></div>
         </div>
         <div class="streak" id="streak" hidden></div>
+        <div class="play-inline"><button class="btn green big pulse" id="playBtn2" type="button">▶ Play</button></div>
       </div>
-      <div class="play-row"><button class="btn green big" id="playBtn" type="button">▶ Play</button></div>
+      <div class="play-row"><button class="btn green big pulse" id="playBtn" type="button">▶ Play</button></div>
     </section>
 
     <nav class="tabs" id="tabs" aria-label="Worlds"></nav>
 
-    <section class="card scene-card">
-      <div class="scene" id="scene"><div id="sceneSvg"></div><div class="critters" id="critters"></div></div>
+    <section class="card scene-card" id="sceneCard">
+      <div class="scene" id="scene"><div id="sceneSvg"></div><div class="critters" id="critters"></div>
+        <div class="treat-hud" id="treatHud" title="Treats to feed your animals">🍎 <b id="treatNum">0</b></div>
+        <button class="scene-btn full-btn" id="fullBtn" type="button" aria-label="Make the world full screen">⛶</button>
+        <div class="scene-tip" id="sceneTip">Tap an animal to give it a treat 🍎</div>
+        <div class="turn-tip">Turn your device sideways for the biggest view</div>
+      </div>
       <div class="scene-meta"><div class="title" id="sceneTitle"></div><div class="count" id="sceneCount"></div></div>
       <div class="next-up" id="nextUp"></div>
       <div class="collection" id="collection"></div>
@@ -366,10 +431,12 @@
   <section id="game" class="screen" aria-label="Spelling round">
     <div class="g-head">
       <button class="quit" id="quitBtn" type="button" aria-label="Stop and go back">✕</button>
-      <div class="dots" id="dots"></div>
+      <div class="trail" id="trail" aria-hidden="true"></div>
       <div class="combo" id="combo"></div>
     </div>
-    <div class="card q-card">
+    <div class="card q-card" id="qCard">
+      <div class="buddy" id="buddy" aria-hidden="true"></div>
+      <div id="goldTag"></div>
       <div class="g-head" style="justify-content:center;margin-bottom:6px"><div class="title" id="gTitle"></div></div>
       <div id="qPicWrap"></div>
       <div class="q-sentence" id="qSentence"></div>
@@ -395,6 +462,7 @@
       <div class="stars" id="resStars"></div>
       <div class="score" id="resScore"></div>
       <div class="msg" id="resMsg"></div>
+      <div class="earned" id="resEarned"></div>
       <div class="lvl-box" id="lvlBox"></div>
       <div class="reward" id="reward" aria-live="polite"></div>
       <div class="wordlist" id="wordList"></div>
@@ -754,15 +822,7 @@ function ttsTexts() {
   function spell(it) { return db.settings.us && it.us ? it.us : it.w; }
 
   // ---------- sound ----------
-  var actx = null;
-  function audio() {
-    if (!db.settings.sound) return null;
-    try {
-      if (!actx) { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; actx = new AC(); }
-      if (actx.state === "suspended") actx.resume();
-      return actx;
-    } catch (e) { return null; }
-  }
+  function audio() { var c = vctx(); return db.settings.sound ? c : null; }   // one audio context for sound effects and the narrator
   function tone(freq, start, dur, type, vol) {
     var c = audio(); if (!c) return;
     try {
@@ -779,40 +839,114 @@ function ttsTexts() {
     bad: function () { tone(220, 0, 0.22, "sine", 0.12); tone(185, 0.12, 0.25, "sine", 0.1); },
     pop: function () { tone(520 + Math.random() * 300, 0, 0.12, "triangle", 0.14); },
     key: function () { tone(820, 0, 0.05, "sine", 0.05); },
+    // each letter you place plays the next note of a happy scale, so spelling a word plays a little tune
+    note: function (i) { var steps = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33, 36], f = 392 * Math.pow(2, steps[Math.min(i, steps.length - 1)] / 12); tone(f, 0, 0.22, "triangle", 0.13); tone(f * 2, 0, 0.12, "sine", 0.03); },
+    win: function (n) { var steps = [0, 4, 7, 12, 16, 19, 24]; for (var k = 0; k < Math.min(7, 3 + n); k++) tone(523 * Math.pow(2, steps[k] / 12), k * 0.07, 0.3, "triangle", 0.12); },
+    chomp: function () { [0, 0.13, 0.26].forEach(function (s) { tone(180 + Math.random() * 60, s, 0.08, "square", 0.05); }); },
+    coin: function () { tone(988, 0, 0.08, "square", 0.05); tone(1319, 0.07, 0.22, "square", 0.05); },
     del: function () { tone(420, 0, 0.05, "sine", 0.05); },
     fanfare: function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.12, 0.35, "triangle", 0.16); }); tone(1319, 0.5, 0.6, "triangle", 0.12); },
     levelup: function () { [392, 523, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, i * 0.09, 0.4, "square", 0.06); tone(f, i * 0.09, 0.4, "triangle", 0.12); }); },
     shake: function () { tone(300, 0, 0.08, "square", 0.04); }
   };
 
+  // ---------- narrator ----------
+  // Every line is pre-recorded with a natural neural voice (audio/<hash>.mp3) and played through Web Audio,
+  // which stays unlocked after the first tap, so words can be read out automatically on phones and tablets too.
+  // The browser's own speech voice is only a fallback for a clip that fails to load.
+  var ctxV = null, voiceOut = null, clips = {}, sayTok = 0, playing = [], slowEl = null;
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}   // play even with the iPhone silent switch on
+  function vctx() {
+    try {
+      if (!ctxV) { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; ctxV = new AC(); voiceOut = ctxV.createGain(); voiceOut.gain.value = 1; voiceOut.connect(ctxV.destination); }
+      if (ctxV.state === "suspended") ctxV.resume();
+      return ctxV;
+    } catch (e) { return null; }
+  }
+  function clipUrl(t) { return "audio/" + vhash(t) + ".mp3"; }
+  function loadClip(t) {
+    if (clips[t]) return clips[t];
+    var c = vctx(); if (!c) return Promise.resolve(null);
+    clips[t] = fetch(clipUrl(t)).then(function (r) { return r.ok ? r.arrayBuffer() : null; }).then(function (ab) {
+      if (!ab) return null;
+      return new Promise(function (res) { try { var pr = c.decodeAudioData(ab, res, function () { res(null); }); if (pr && pr.catch) pr.catch(function () { res(null); }); } catch (e) { res(null); } });
+    }).catch(function () { return null; });
+    clips[t].then(function (b) { if (!b) delete clips[t]; });
+    return clips[t];
+  }
+  function preload(list) { if (db.settings.voice) [].concat(list).forEach(loadClip); }
+
   var voices = [];
   function loadVoices() { try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
   if ("speechSynthesis" in window) { loadVoices(); try { window.speechSynthesis.addEventListener("voiceschanged", loadVoices); } catch (e) {} }
-  function bestVoice() {
-    var prefs = db.settings.us ? ["en-US"] : ["en-NZ", "en-AU", "en-GB"];
-    for (var i = 0; i < prefs.length; i++) for (var j = 0; j < voices.length; j++) if ((voices[j].lang || "").replace("_", "-") === prefs[i]) return voices[j];
-    return null;
+  function bestVoice() {   // fallback only: prefer the natural sounding voices browsers ship
+    var langs = db.settings.us ? ["en-US"] : ["en-NZ", "en-AU", "en-GB", "en-IE"], best = null, bestScore = -1;
+    voices.forEach(function (v) {
+      var lang = (v.lang || "").replace("_", "-"), li = langs.indexOf(lang); if (li === -1 && lang.indexOf("en") !== 0) return;
+      var s = (li === -1 ? 0 : 40 - li * 5) + (/natural|neural|premium|enhanced|siri/i.test(v.name) ? 50 : 0) + (/google/i.test(v.name) ? 25 : 0) + (/karen|catherine|serena|kate|samantha|moira|libby|sonia|natasha/i.test(v.name) ? 15 : 0);
+      if (/compact|eloquence|bahh|bells|boing|bubbles|cellos|wobble|jester|organ|superstar|whisper|zarvox|trinoids|albert|fred|junior|ralph|grandpa|grandma|rocko|bad news|good news/i.test(v.name)) s -= 100;
+      if (s > bestScore) { bestScore = s; best = v; }
+    });
+    return best;
   }
-  function hush() { try { window.speechSynthesis.cancel(); } catch (e) {} }
-  function say(texts, rate) {
-    if (!db.settings.voice || !("speechSynthesis" in window)) return;
+  function synth(texts, rate) {
+    if (!("speechSynthesis" in window)) return;
     try {
       window.speechSynthesis.cancel();
       var v = bestVoice();
-      [].concat(texts).forEach(function (t) {
+      texts.forEach(function (t) {
         var u = new SpeechSynthesisUtterance(t);
-        u.rate = rate || 0.85; u.pitch = 1.05; u.lang = v ? v.lang : (db.settings.us ? "en-US" : "en-GB");
+        u.rate = rate || 0.9; u.lang = v ? v.lang : (db.settings.us ? "en-US" : "en-GB");
         if (v) u.voice = v;
         window.speechSynthesis.speak(u);
       });
     } catch (e) {}
+  }
+  function hush() {
+    sayTok++;
+    playing.forEach(function (s) { try { s.stop(); } catch (e) {} }); playing = [];
+    if (slowEl) { try { slowEl.pause(); } catch (e) {} slowEl = null; }
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
+  // say(lines, {gap: seconds between lines, gaps: [per-line gaps], done: callback})
+  function say(texts, opts) {
+    if (!db.settings.voice) return;
+    texts = [].concat(texts); opts = opts || {};
+    hush(); var my = sayTok;
+    Promise.all(texts.map(loadClip)).then(function (bufs) {
+      if (my !== sayTok) return;
+      if (bufs.some(function (b) { return !b; })) { synth(texts); return; }
+      var c = vctx(); if (!c) return;
+      var t = c.currentTime + 0.04;
+      bufs.forEach(function (b, i) {
+        var s = c.createBufferSource(); s.buffer = b; s.connect(voiceOut); s.start(t); playing.push(s);
+        t += b.duration + (opts.gaps ? opts.gaps[i] || 0 : opts.gap != null ? opts.gap : 0.3);
+      });
+      if (opts.done) setTimeout(function () { if (my === sayTok) opts.done(); }, (t - c.currentTime) * 1000);
+    });
+  }
+  // Slow mode keeps the voice's pitch by using an <audio> element (only ever started by a tap).
+  function saySlow(text) {
+    if (!db.settings.voice) return;
+    hush();
+    try {
+      var a = new Audio(clipUrl(text)); a.playbackRate = 0.6; a.preservesPitch = true; a.webkitPreservesPitch = true; slowEl = a;
+      var pr = a.play(); if (pr && pr.catch) pr.catch(function () { synth([text], 0.5); });
+      a.onerror = function () { synth([text], 0.5); };
+    } catch (e) { synth([text], 0.5); }
+  }
+  function spellOut(word, done) {
+    var lines = [word, PHRASES.together], gaps = [0.5, 0.35];
+    word.toLowerCase().split("").forEach(function (ch) { lines.push(ch === "z" && db.settings.us ? "Zee." : LETTER_SAY[ch] || ch); gaps.push(0.12); });
+    gaps[gaps.length - 1] = 0.45; lines.push(word);
+    say(lines, { gaps: gaps, done: done });
   }
 
   // ---------- screens ----------
   var SCREENS = ["profiles", "home", "game", "results"];
   function show(name) {
     SCREENS.forEach(function (id) { $(id).classList.toggle("active", id === name); });
-    if (name !== "home") stopScene();
+    if (name !== "home") { stopScene(); $("sceneCard").classList.remove("full"); $("fullBtn").textContent = "⛶"; document.body.style.overflow = ""; }
     if (name !== "game") hush();
     window.scrollTo(0, 0);
   }
@@ -892,7 +1026,8 @@ function ttsTexts() {
     var live = p.streak && (p.streak.day === dayKey() || p.streak.day === dayKey(new Date(Date.now() - 864e5)));
     st.hidden = !(live && p.streak.count > 1);
     if (!st.hidden) st.textContent = "🔥 " + p.streak.count + " days";
-    $("playBtn").textContent = "▶ Play Level " + p.level;
+    $("playBtn").textContent = $("playBtn2").textContent = "▶ Play Level " + p.level;
+    updateTreats();
 
     // world tabs
     var tabs = $("tabs"); tabs.innerHTML = "";
@@ -931,7 +1066,8 @@ function ttsTexts() {
     w.animals.forEach(function (a) {
       var has = have.indexOf(a.id) !== -1;
       var s = el("div", "slot" + (has ? "" : " locked")); s.title = has ? a.name : "Still to find";
-      s.setAttribute("aria-label", has ? a.name : "Mystery animal"); s.appendChild(el("span", null, a.e));
+      s.setAttribute("aria-label", has ? a.name + (isFriend(p, a) ? ", best friend" : "") : "Mystery animal"); s.appendChild(el("span", null, a.e));
+      if (has && isFriend(p, a)) s.appendChild(el("span", "bf", "👑"));
       col.appendChild(s);
     });
 
@@ -976,11 +1112,22 @@ function ttsTexts() {
           var dest = kind === "water" && w.pond ? (w.pond[0] + w.pond[1]) / 2 : rand(38, 62);
           var arrive = Math.abs(dest - c.x) / speedOf(kind, true) * 1000;
           wander(c, dest);
-          setTimeout(function () { if (critters.indexOf(c) === -1) return; tapCritter(c); burst(c.el, 10, ["🎉", "✨", "⭐", "💖"]); }, reduceMotion ? 300 : arrive + 100);
+          setTimeout(function () { if (critters.indexOf(c) === -1) return; tapCritter(c, true); burst(c.el, 10, ["🎉", "✨", "⭐", "💖"]); }, reduceMotion ? 300 : arrive + 100);
         }, 500);
       }
     }
     if (have.length === 0) scene.appendChild(el("div", "empty", "🐾 " + w.name + " is waiting for its first animal!"));
+    var tip = $("sceneTip"), friends = have.filter(function (id) { var a = animalOf(w, id); return a && isFriend(p, a); }).length;
+    tip.hidden = !(open && have.length && friends < have.length);
+    tip.textContent = (p.treats || 0) > 0 ? "Tap an animal to give it a treat 🍎" : "Spell words to earn treats for your animals 🍎";
+    tip.classList.remove("gone"); clearTimeout(tipT); tipT = setTimeout(function () { tip.classList.add("gone"); }, 6000);
+  }
+  var tipT;
+  function isFriend(p, a) { return ((p.love || {})[a.id] || 0) >= BEST_FRIEND; }
+  function updateTreats(bump) {
+    var p = P(), n = p ? p.treats || 0 : 0;
+    $("treatNum").textContent = n;
+    if (bump) retrigger($("treatHud"), "bump");
   }
   function animalOf(w, id) { for (var i = 0; i < w.animals.length; i++) if (w.animals[i].id === id) return w.animals[i]; return null; }
   function kindOf(a, w) { return a.k || (w.swim ? "swim" : ""); }
@@ -1008,11 +1155,12 @@ function ttsTexts() {
     var e = el("button", "critter" + (kind === "fly" || kind === "swim" ? " flyer" : "")); e.type = "button"; e.setAttribute("aria-label", a.name);
     var bottom = kind === "fly" ? rand(55, 70) : kind === "swim" ? rand(24, 74) : kind === "floor" ? rand(4, 9) : kind === "water" ? rand(8, 13) : rand(5, 30);
     var depth = (kind === "fly" || kind === "swim") ? 0.95 : 1.25 - (bottom - 4) / 26 * 0.45;
-    var base = Math.min(scene.clientWidth || 500, 600) / 520 * 2.3;
+    var base = Math.min(scene.clientWidth || 500, 1500) / 520 * 2.4;
     e.style.setProperty("--sz", (base * a.size * depth).toFixed(2) + "rem");
     e.style.bottom = bottom + "%"; e.style.zIndex = String(100 - Math.round(bottom));
     e.innerHTML = '<span class="shadow"></span><span class="face"><span class="body"></span></span><span class="bubble"></span>';
     e.querySelector(".body").textContent = a.e; e.querySelector(".bubble").textContent = a.name + "!";
+    if (isFriend(P(), a)) e.appendChild(el("span", "crown", "👑"));
     if (opts.isNew) { var tag = el("span", "new-tag", "NEW!"); e.appendChild(tag); setTimeout(function () { tag.remove(); }, 9000); }
     var c = { el: e, a: a, w: w, kind: kind, x: 50, timer: null };
     var sx = opts.enterFrom != null ? opts.enterFrom : (kind === "water" && w.pond ? rand(w.pond[0], w.pond[1]) : rand(8, 92));
@@ -1035,10 +1183,41 @@ function ttsTexts() {
     }, dur * 1000 + 50);
   }
   function retrigger(e, cls) { e.classList.remove(cls); void e.offsetWidth; e.classList.add(cls); setTimeout(function () { e.classList.remove(cls); }, 1300); }
-  function tapCritter(c) {
-    sfx.pop(); retrigger(c.el, "jump"); c.el.classList.add("talk");
-    clearTimeout(c.talkT); c.talkT = setTimeout(function () { c.el.classList.remove("talk"); }, 2200);
-    say(c.a.name, 0.95); burst(c.el, 6, ["✨", "💛", "⭐"]);
+  function talk(c, text, ms) {
+    c.el.querySelector(".bubble").textContent = text; c.el.classList.add("talk");
+    clearTimeout(c.talkT); c.talkT = setTimeout(function () { c.el.classList.remove("talk"); }, ms || 2200);
+  }
+  // Tapping an animal feeds it one treat. Five treats make it your best friend (it gets a crown).
+  function tapCritter(c, greetOnly) {
+    var p = P(), love = p.love || (p.love = {}), n = love[c.a.id] || 0;
+    if (greetOnly || n >= BEST_FRIEND) {
+      sfx.pop(); retrigger(c.el, "jump"); talk(c, c.a.name + (n >= BEST_FRIEND ? " 👑" : "!"));
+      say(c.a.name + "!"); burst(c.el, 6, ["✨", "💛", "⭐"]); return;
+    }
+    if (!(p.treats > 0)) {
+      sfx.pop(); retrigger(c.el, "hopping"); talk(c, "Hungry! 🍎 Spell words to earn treats", 2600);
+      say([c.a.name + "!", PHRASES.hungry], { gap: 0.2 }); return;
+    }
+    if (c.eating) return;
+    c.eating = true; p.treats--; n = love[c.a.id] = n + 1; save(); updateTreats(true);
+    $("sceneTip").classList.add("gone");
+    var drop = el("span", "treat-drop", "🍎"), r = c.el.getBoundingClientRect(), sr = $("scene").getBoundingClientRect();
+    drop.style.left = (r.left - sr.left) + "px"; drop.style.top = (r.top - sr.top - 20) + "px";
+    $("scene").appendChild(drop); setTimeout(function () { drop.remove(); }, 600);
+    setTimeout(function () {
+      c.el.classList.add("eat"); sfx.chomp();
+      setTimeout(function () {
+        c.el.classList.remove("eat"); c.eating = false; retrigger(c.el, "jump");
+        if (n >= BEST_FRIEND) {
+          talk(c, "👑 Best friends!", 3200); sfx.fanfare(); say(friendLine(c.a)); burst(c.el, 14, ["💖", "👑", "✨", "🎉"]);
+          if (!c.el.querySelector(".crown")) c.el.appendChild(el("span", "crown", "👑"));
+          var slot = $("collection").children[c.w.animals.indexOf(c.a)];
+          if (slot && !slot.querySelector(".bf")) slot.appendChild(el("span", "bf", "👑"));
+        } else {
+          talk(c, "Yum! " + "❤️".repeat(n) + "🤍".repeat(BEST_FRIEND - n), 2400); sfx.pop(); say(pick(PHRASES.yum)); burst(c.el, 7, ["💖", "❤️", "✨"]);
+        }
+      }, 1000);
+    }, 500);
   }
   function burst(anchor, n, chars) {
     if (reduceMotion) return;
@@ -1073,16 +1252,26 @@ function ttsTexts() {
   function startRound(mode, wi) {
     var p = P(); audio();
     if (mode === "quest") wi = worldIndex(p.level);
-    R = { mode: mode, wi: wi, level: p.level, items: buildRound(mode, wi), i: 0, res: [], combo: 0, tok: ++tok };
+    R = { mode: mode, wi: wi, level: p.level, items: buildRound(mode, wi), i: 0, res: [], combo: 0, best: 0, treats: 0, tok: ++tok };
+    R.gold = R.items.length - 1;   // the last word of every round is a golden word worth double treats
     $("gTitle").textContent = mode === "quest" ? WORLDS[wi].icon + " Level " + p.level : WORLDS[wi].icon + " Practice";
-    setTint(WORLDS[wi]);
+    setTint(WORLDS[wi]); $("trail").innerHTML = "";
+    // the buddy is one of your animals from this world, cheering you on
+    var have = owned(p, WORLDS[wi]), friend = have.length ? animalOf(WORLDS[wi], pick(have)) : null;
+    R.buddy = friend ? friend.e : WORLDS[wi].icon;
+    R.items.forEach(function (it) { var d = spell(it); preload(it.s ? [d, sentenceOf(it, d)] : [d]); });
+    preload([].concat(PHRASES.praise, PHRASES.fixed, PHRASES.close, PHRASES.miss, PHRASES.golden, PHRASES.combo3, PHRASES.hint));
     show("game"); renderQ();
   }
   function quitRound() { tok++; R = null; Q = null; renderHome(); }
 
   function renderQ() {
     var it = R.items[R.i], disp = spell(it), w = disp.toLowerCase(), n = w.length;
-    Q = { it: it, disp: disp, w: w, entry: [], locked: [], wrong: [], attempts: 0, helped: false, hints: 0, maxHints: Math.max(1, Math.floor(n / 3)), done: false, busy: false, tileMode: it.level <= 4, tiles: [] };
+    Q = { it: it, disp: disp, w: w, entry: [], locked: [], wrong: [], attempts: 0, helped: false, hints: 0, maxHints: Math.max(1, Math.floor(n / 3)), done: false, busy: false, tileMode: it.level <= 4, tiles: [], golden: R.i === R.gold };
+    $("qCard").classList.toggle("golden", Q.golden);
+    $("goldTag").innerHTML = Q.golden ? '<span class="gold-tag">🌟 GOLDEN WORD · double treats</span>' : "";
+    var bd = $("buddy"); bd.textContent = R.buddy; bd.className = "buddy";
+    $("checkBtn").textContent = "Check";
     for (var i = 0; i < n; i++) { Q.entry.push(null); Q.locked.push(false); Q.wrong.push(false); }
     if (Q.tileMode) {
       var extra = it.level <= 2 ? 2 : 3, letters = w.split(""), abc = "abcdefghijklmnoprstuw".split("").filter(function (c) { return w.indexOf(c) === -1; });
@@ -1102,6 +1291,27 @@ function ttsTexts() {
     $("hintBtn").textContent = "💡 Hint";
     renderDots(); renderCombo(); renderSlots(); renderTiles();
     var t = R.tok; setTimeout(function () { if (tok === t) speakQ(); }, 350);
+    var nx = R.items[R.i + 1]; if (nx) { var nd = spell(nx); preload(nx.s ? [nd, sentenceOf(nx, nd)] : [nd]); }
+  }
+  function react(cls) { var b = $("buddy"); b.className = "buddy"; void b.offsetWidth; b.className = "buddy " + cls; }
+  function centerOf(e) { var r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+  function floatText(anchor, text, color) {
+    var c = centerOf(anchor), f = el("div", "float-txt", text);
+    f.style.left = c.x + "px"; f.style.top = (c.y - 30) + "px"; if (color) f.style.color = color;
+    document.body.appendChild(f); setTimeout(function () { f.remove(); }, 1400);
+  }
+  function sparkAt(anchor, n, chars) {
+    if (reduceMotion) return;
+    var c = centerOf(anchor);
+    for (var i = 0; i < n; i++) {
+      var s = el("span", "fx", chars[i % chars.length]), ang = Math.random() * Math.PI * 2, r = rand(50, 120);
+      s.style.left = c.x + "px"; s.style.top = c.y + "px";
+      s.style.setProperty("--dx", Math.cos(ang) * r + "px"); s.style.setProperty("--dy", (Math.sin(ang) * r - 30) + "px");
+      document.body.appendChild(s); (function (s) { setTimeout(function () { s.remove(); }, 1000); })(s);
+    }
+  }
+  function banner(text) {
+    var b = el("div", "banner", text); document.body.appendChild(b); setTimeout(function () { b.remove(); }, 1700);
   }
   function renderSentence(filled) {
     var box = $("qSentence"), it = Q.it; box.innerHTML = "";
@@ -1114,13 +1324,26 @@ function ttsTexts() {
   }
   function wordInSentence() { var d = Q.disp; return Q.it.s.charAt(0) === "_" ? d.charAt(0).toUpperCase() + d.slice(1) : d; }
   function speakQ(slow) {
-    var it = Q.it, rate = slow ? 0.5 : 0.85;
-    if (it.s && !slow) say([Q.disp, it.s.replace("_", Q.disp), Q.disp], rate);
-    else say(Q.disp, rate);
+    var it = Q.it;
+    if (slow) { saySlow(Q.disp); return; }
+    var lines = it.s ? [Q.disp, sentenceOf(it, Q.disp), Q.disp] : [Q.disp];
+    if (Q.golden && !Q.announced) { Q.announced = true; lines.unshift(PHRASES.golden); }
+    say(lines, { gap: 0.45 });
   }
+  // the trail: one stepping stone per word, your explorer hops along it, the prize waits at the end
   function renderDots() {
-    var d = $("dots"); d.innerHTML = "";
-    R.items.forEach(function (_, i) { d.appendChild(el("i", (R.res[i] || "") + (i === R.i && !R.res[i] ? " cur" : ""))); });
+    var d = $("trail"), p = P(), n = R.items.length, walker = d.querySelector(".walker");
+    if (!walker || d.children.length !== n + 2) {
+      d.innerHTML = "";
+      for (var i = 0; i < n; i++) { var cell = el("div", "cell"); cell.appendChild(el("i", "st")); d.appendChild(cell); }
+      var end = el("div", "cell"); end.appendChild(el("span", "prize-box", "🎁")); d.appendChild(end);
+      walker = el("span", "walker", p ? p.avatar : "🧭"); d.appendChild(walker);
+    }
+    var stones = d.querySelectorAll(".st");
+    for (var k = 0; k < n; k++) stones[k].className = "st" + (k === R.gold ? " gold" : "") + (R.res[k] ? " " + R.res[k] : "");
+    var pos = Math.min(R.res.filter(Boolean).length, n), left = (pos + 0.5) * 100 / (n + 1) + "%";
+    if (walker.style.left && walker.style.left !== left) retrigger(walker, "hop");
+    walker.style.left = left;
   }
   function renderCombo() {
     var c = $("combo");
@@ -1131,7 +1354,7 @@ function ttsTexts() {
     box.className = "slots" + (n > 12 ? " xlong" : n > 8 ? " long" : "");
     box.innerHTML = "";
     for (var i = 0; i < n; i++) (function (i) {
-      var e = Q.entry[i], b = el("button", "s"); b.type = "button";
+      var e = Q.entry[i], b = el("button", "s"); b.type = "button"; b.style.setProperty("--i", i);
       if (Q.reveal) { b.textContent = Q.disp[i]; b.className += " reveal"; }
       else if (e) { b.textContent = Q.done ? Q.disp[i] : e.ch; b.className += Q.locked[i] ? " locked" : Q.wrong[i] ? " wrong" : " filled"; }
       else if (i === nextIdx) b.className += " next";
@@ -1161,8 +1384,9 @@ function ttsTexts() {
       if (tileIdx === -1 || Q.tiles[tileIdx].used) { nudge("tiles"); return; }
       Q.tiles[tileIdx].used = true;
     }
-    Q.entry[i] = { ch: ch, t: tileIdx }; sfx.key();
+    Q.entry[i] = { ch: ch, t: tileIdx }; sfx.note(i);
     renderSlots(); renderTiles();
+    var s = $("slots").children[i]; if (s) s.classList.add("justin");
   }
   function clearAt(i) { var e = Q.entry[i]; if (!e) return; if (Q.tileMode && e.t != null && e.t >= 0) Q.tiles[e.t].used = false; Q.entry[i] = null; Q.wrong[i] = false; }
   function removeAt(i) { if (!Q || Q.done || Q.busy || Q.locked[i] || !Q.entry[i]) return; clearAt(i); sfx.del(); renderSlots(); renderTiles(); }
@@ -1183,52 +1407,67 @@ function ttsTexts() {
     }
     // close any gap so letters stay in order around the hint
     Q.entry[idx] = { ch: ch, t: t }; Q.locked[idx] = true; Q.helped = true; Q.hints++;
-    sfx.pop();
+    sfx.pop(); react("think"); say(PHRASES.hint);
     $("feedback").className = "feedback info"; $("feedback").textContent = "Here is a letter to help you.";
     if (Q.hints >= Q.maxHints) $("hintBtn").disabled = true;
     renderSlots(); renderTiles();
   }
 
   function check() {
+    if (Q && Q.done && R && R.next) { R.next(); return; }   // "Next" skips the wait after a word
     if (!Q || Q.done || Q.busy) return;
     if (Q.entry.indexOf(null) !== -1) { nudge("slots"); $("feedback").className = "feedback info"; $("feedback").textContent = "Fill in every letter first."; return; }
-    var guess = Q.entry.map(function (e) { return e.ch; }).join(""), fb = $("feedback"), t = R.tok, i;
+    var guess = Q.entry.map(function (e) { return e.ch; }).join(""), fb = $("feedback"), t = R.tok, i, p = P();
     if (guess === Q.w) {
       Q.done = true; for (i = 0; i < Q.w.length; i++) Q.locked[i] = true;
       var first = Q.attempts === 0 && !Q.helped;
       R.res[R.i] = first ? "first" : "ok";
-      R.combo = first ? R.combo + 1 : 0;
+      R.combo = first ? R.combo + 1 : 0; R.best = Math.max(R.best, R.combo);
+      // treats: 3 first time, 1 with help, doubled on the golden word, +1 while on a streak of 3 or more
+      var gain = (first ? 3 : 1) * (Q.golden ? 2 : 1) + (first && R.combo >= 3 ? 1 : 0);
+      p.treats = (p.treats || 0) + gain; R.treats += gain; save();
       fb.className = "feedback good";
       fb.textContent = (first ? pick(["Yes!", "Brilliant!", "Super!", "Spot on!", "Amazing!"]) : pick(["You got there!", "Well done!", "Nice fixing!"])) + " “" + Q.disp + "” is right! 🎉";
       var pic = $("qPic"); if (pic && Q.it.e) pic.className = "q-pic happy";
-      renderSentence(true); sfx.good(R.combo); endQ(1150);
+      renderSentence(true); sfx.win(R.combo); setTimeout(sfx.coin, 450);
+      var lines = [first ? pick(PHRASES.praise) : pick(PHRASES.fixed)];
+      if (first && R.combo === 3) { lines.push(PHRASES.combo3); banner("🔥 3 in a row!"); }
+      else if (first && R.combo === 5) { lines.push(PHRASES.combo5); banner("🔥🔥 5 in a row!"); }
+      say(lines, { gap: 0.15 });
+      react("cheer"); endQ(lines.length > 1 ? 2600 : 1700);
+      $("slots").classList.add("win");
+      floatText($("slots"), "+" + gain + " 🍎");
+      sparkAt($("slots"), Q.golden ? 16 : 9, Q.golden ? ["🌟", "✨", "💛", "🍎"] : ["✨", "⭐", "💖"]);
     } else {
-      Q.attempts++; sfx.bad();
+      Q.attempts++; sfx.bad(); react("sad");
       if (Q.attempts < 2) {
         Q.busy = true; var right = 0;
         for (i = 0; i < Q.w.length; i++) { if (Q.entry[i].ch === Q.w[i]) { Q.locked[i] = true; right++; } else if (!Q.locked[i]) Q.wrong[i] = true; }
         fb.className = "feedback bad";
         fb.textContent = right ? "So close! The green letters are right. Fix the rest." : "Not quite. Listen again and have another go!";
         renderSlots();
+        say(right ? PHRASES.close : PHRASES.miss, { done: function () { if (tok === t && Q && !Q.done) speakQ(); } });
         setTimeout(function () {
           if (tok !== t || !Q) return;
           for (var j = 0; j < Q.w.length; j++) if (Q.wrong[j]) clearAt(j);
-          Q.busy = false; renderSlots(); renderTiles(); speakQ();
+          Q.busy = false; renderSlots(); renderTiles();
         }, 1100);
       } else {
         Q.done = true; Q.reveal = true; R.res[R.i] = "miss"; R.combo = 0;
         fb.className = "feedback info"; fb.textContent = "It is spelled “" + Q.disp + "”. You will get another go at it soon!";
         renderSentence(true);
-        say([Q.disp, Q.w.toUpperCase().split("").join(", "), Q.disp], 0.8);
-        endQ(Math.min(5200, 2400 + Q.w.length * 230));
+        spellOut(Q.disp, function () { setTimeout(function () { if (R && R.next) R.next(); }, 700); });
+        endQ(db.settings.voice ? 15000 : Math.min(5200, 2400 + Q.w.length * 230));
       }
     }
   }
   function endQ(ms) {
-    $("hintBtn").disabled = true; $("checkBtn").disabled = true; $("delBtn").disabled = true;
+    $("hintBtn").disabled = true; $("delBtn").disabled = true;
+    $("checkBtn").disabled = false; $("checkBtn").textContent = "Next ▶"; $("checkBtn").classList.remove("pulse");
     renderSlots(); renderDots(); renderCombo();
-    var t = R.tok;
-    setTimeout(function () { if (tok !== t) return; R.i++; if (R.i < R.items.length) renderQ(); else finishRound(); }, ms);
+    var t = R.tok, qi = R.i;
+    R.next = function () { if (tok !== t || !R || R.i !== qi) return; R.next = null; R.i++; if (R.i < R.items.length) renderQ(); else finishRound(); };
+    setTimeout(function () { if (R && R.next) R.next(); }, ms);
   }
 
   // ---------- finishing ----------
@@ -1245,7 +1484,8 @@ function ttsTexts() {
     if (!p.streak) p.streak = { day: null, count: 0 };
     if (p.streak.day !== today) { p.streak.count = p.streak.day === dayKey(new Date(Date.now() - 864e5)) ? p.streak.count + 1 : 1; p.streak.day = today; }
 
-    var out = { correct: correct, n: n, stars: stars, levelUp: false, newWorld: null, animal: null, world: WORLDS[R.wi], brings: null, mode: R.mode, gained: 0 };
+    var out = { correct: correct, n: n, stars: stars, levelUp: false, newWorld: null, animal: null, world: WORLDS[R.wi], brings: null, mode: R.mode, gained: 0, treats: R.treats, daily: false, perfect: first === n };
+    if (p.bonusDay !== today) { p.bonusDay = today; p.treats = (p.treats || 0) + 10; out.daily = true; }
     if (R.mode === "quest") {
       out.gained = Math.min(stars, STARS_NEEDED - p.stars);
       p.stars += stars;
@@ -1278,7 +1518,15 @@ function ttsTexts() {
     var sr = $("resStars"); sr.innerHTML = "";
     for (i = 0; i < 3; i++) { var s = el("span", i < o.stars ? "on" : "", "⭐"); s.setAttribute("aria-hidden", "true"); if (i < o.stars) s.style.animationDelay = (i * 0.18) + "s"; sr.appendChild(s); }
     $("resScore").textContent = o.correct + " / " + o.n;
-    $("resMsg").textContent = o.stars === 3 ? "Spelling superstar!" : o.stars === 2 ? "Awesome spelling! Keep it up!" : "Good practice! Every try makes you stronger.";
+    var msg = o.perfect ? PHRASES.perfect : o.stars === 3 ? PHRASES.star3 : o.stars === 2 ? PHRASES.star2 : PHRASES.star1;
+    $("resMsg").textContent = msg;
+    var ea = $("resEarned"); ea.innerHTML = "";
+    if (o.treats) ea.appendChild(el("span", null, "+" + o.treats + " 🍎 treats"));
+    if (o.daily) ea.appendChild(el("span", null, "🎁 Daily bonus +10 🍎"));
+    var spoken = [msg];
+    if (o.daily) spoken.push(PHRASES.daily);
+    if (o.levelUp) { spoken.push(PHRASES.levelup); if (o.newWorld) spoken.push(welcomeLine(o.newWorld)); }
+    var rt = R.tok; setTimeout(function () { if (tok === rt && $("results").classList.contains("active")) say(spoken, { gap: 0.3 }); }, 400);
 
     var lb = $("lvlBox"); lb.innerHTML = ""; lb.className = "lvl-box"; lb.hidden = o.mode !== "quest";
     if (o.mode === "quest") {
@@ -1328,11 +1576,12 @@ function ttsTexts() {
           r.classList.add("revealed");
           title.textContent = a.name + " joined " + o.world.name + "!";
           sub.textContent = "They brought " + o.brings.replace(/^\S+\s/, "") + " with them.";
-          if ($("results").classList.contains("active")) { sfx.fanfare(); say(a.name + " joined your world!", 0.95); }
+          if ($("results").classList.contains("active")) { sfx.fanfare(); say(joinedLine(a)); }
         }, 380);
       };
       gift.addEventListener("click", open);
-      setTimeout(open, reduceMotion ? 200 : (o.levelUp ? 2600 : 1600));
+      title.textContent = "Tap the present!";
+      setTimeout(open, reduceMotion ? 200 : (o.levelUp ? 6500 : 4500));
     } else if (o.correct >= 5) {
       stage.appendChild(el("span", "prize", "🏆")); r.classList.add("revealed");
       title.textContent = "Every animal is home!"; sub.textContent = "Level up to unlock a new world with new animals.";
@@ -1364,7 +1613,7 @@ function ttsTexts() {
   var delArmed = false;
   function renderSettings() {
     seg("segSound", db.settings.sound, function (v) { db.settings.sound = v; if (v) setTimeout(sfx.pop, 0); });
-    seg("segVoice", db.settings.voice, function (v) { db.settings.voice = v; if (!v) hush(); else setTimeout(function () { say("Hello!"); }, 0); });
+    seg("segVoice", db.settings.voice, function (v) { db.settings.voice = v; if (!v) hush(); else setTimeout(function () { say(PHRASES.praise[4]); }, 0); });
     seg("segSpell", db.settings.us, function (v) { db.settings.us = v; });
     $("spellEg").textContent = db.settings.us ? "color, favorite, center" : "colour, favourite, centre";
     var p = P(); $("playerSettings").hidden = !p || $("game").classList.contains("active");
@@ -1395,6 +1644,16 @@ function ttsTexts() {
   $("slowBtn").addEventListener("click", function () { if (Q) speakQ(true); });
   $("quitBtn").addEventListener("click", quitRound);
   $("playBtn").addEventListener("click", function () { startRound("quest"); });
+  $("playBtn2").addEventListener("click", function () { startRound("quest"); });
+  function setFull(on) {
+    var card = $("sceneCard"); if (card.classList.contains("full") === on) return;
+    card.classList.toggle("full", on); $("fullBtn").textContent = on ? "✕" : "⛶";
+    $("fullBtn").setAttribute("aria-label", on ? "Close full screen" : "Make the world full screen");
+    document.body.style.overflow = on ? "hidden" : "";
+    sfx.pop(); var p = P(); if (p && viewW != null) renderWorld(p, WORLDS[viewW]);
+  }
+  $("fullBtn").addEventListener("click", function () { setFull(!$("sceneCard").classList.contains("full")); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") setFull(false); });
   $("practiceBtn").addEventListener("click", function () { startRound("practice", viewW); });
   $("againBtn").addEventListener("click", function () { var m = R ? R.mode : "quest", wi = R ? R.wi : 0, p = P(); if (m === "practice" && p.level >= WORLDS[wi].from) startRound("practice", wi); else startRound("quest"); });
   $("worldBtn").addEventListener("click", function () { viewW = null; renderHome(); });

@@ -4,9 +4,30 @@ A free spelling game for kids of every level, live at https://spelling.world
 
 - 20 levels of steadily harder words across five worlds
 - Win animals and scenery for each world by spelling words correctly
-- Player profiles, NZ/UK or US spelling, read-aloud words
-- One static file (`index.html`). No build step, no backend, no tracking. Progress is saved in the browser.
+- Earn treats as you spell and feed them to your animals. Five treats makes an animal your best friend
+- Every round ends with a golden word worth double treats, plus streak banners and a daily bonus
+- A natural, recorded narrator voice reads every word, sentence and cheer
+- Player profiles, NZ/UK or US spelling. No build step, no accounts, no tracking. Progress is saved in the browser
+
+## Layout
+
+- `public/index.html`: the whole game (one file)
+- `public/audio/`: the narrator's recorded lines, one MP3 per line, named by a hash of the text
+- `functions/api/tts.js`: Cloudflare Pages Function used only to record new lines (Workers AI, Deepgram Aura 2, voice "theia"). It only speaks lines listed in `functions/api/tts-texts.json`
+- `tools/gen-audio.mjs`: builds that list and downloads any missing recordings
+
+## Changing words or phrases
+
+```bash
+node tools/gen-audio.mjs texts
+```
+
+Commit and push so the function knows the new lines, then record them and push again:
+
+```bash
+node tools/gen-audio.mjs fetch https://spelling.world
+```
 
 ## Deploy
 
-Hosted on Cloudflare Pages (project `spelling`), deployed from this repo. Every push to `main` redeploys.
+Hosted on Cloudflare Pages (project `spelling`), deployed from this repo. Every push to `main` redeploys. `wrangler.toml` sets the output folder (`public`) and the Workers AI binding.
