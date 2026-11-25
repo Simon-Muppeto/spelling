@@ -481,6 +481,7 @@
     <h3>Sound</h3>
     <div class="set-row"><div>Sound effects</div><div class="seg" id="segSound"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div></div>
     <div class="set-row"><div>Read words aloud<small>Needed for the harder levels</small></div><div class="seg" id="segVoice"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div></div>
+    <div class="set-row"><div>Narrator voice<small>Tap to hear them</small></div><div class="seg" id="segNarrator"></div></div>
     <h3>Spelling</h3>
     <div class="set-row"><div>Word spellings<small id="spellEg"></small></div><div class="seg" id="segSpell"><button data-v="0" type="button">NZ / UK</button><button data-v="1" type="button">US</button></div></div>
     <div id="playerSettings">
@@ -863,7 +864,10 @@ function ttsTexts() {
       return ctxV;
     } catch (e) { return null; }
   }
-  function clipUrl(t) { return "audio/" + vhash(t) + ".mp3"; }
+  // narrator voices: folder in audio/ -> label in Settings. The first one is the default.
+  var NARRATORS = { pandora: "British", theia: "Australian" };
+  function narrator() { return NARRATORS[db.settings.narrator] ? db.settings.narrator : Object.keys(NARRATORS)[0]; }
+  function clipUrl(t) { return "audio/" + narrator() + "/" + vhash(t) + ".mp3"; }
   function loadClip(t) {
     if (clips[t]) return clips[t];
     var c = vctx(); if (!c) return Promise.resolve(null);
@@ -1614,6 +1618,12 @@ function ttsTexts() {
   function renderSettings() {
     seg("segSound", db.settings.sound, function (v) { db.settings.sound = v; if (v) setTimeout(sfx.pop, 0); });
     seg("segVoice", db.settings.voice, function (v) { db.settings.voice = v; if (!v) hush(); else setTimeout(function () { say(PHRASES.praise[4]); }, 0); });
+    var sn = $("segNarrator"); sn.innerHTML = "";
+    Object.keys(NARRATORS).forEach(function (id) {
+      var b = el("button", id === narrator() ? "on" : "", NARRATORS[id]); b.type = "button";
+      b.onclick = function () { db.settings.narrator = id; clips = {}; save(); renderSettings(); say(PHRASES.praise[0]); };
+      sn.appendChild(b);
+    });
     seg("segSpell", db.settings.us, function (v) { db.settings.us = v; });
     $("spellEg").textContent = db.settings.us ? "color, favorite, center" : "colour, favourite, centre";
     var p = P(); $("playerSettings").hidden = !p || $("game").classList.contains("active");

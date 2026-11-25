@@ -12,8 +12,8 @@ A free spelling game for kids of every level, live at https://spelling.world
 ## Layout
 
 - `public/index.html`: the whole game (one file)
-- `public/audio/`: the narrator's recorded lines, one MP3 per line, named by a hash of the text
-- `functions/api/tts.js`: Cloudflare Pages Function used only to record new lines (Workers AI, Deepgram Aura 2, voice "theia"). It only speaks lines listed in `functions/api/tts-texts.json`
+- `public/audio/<voice>/`: the narrator's recorded lines, one MP3 per line, named by a hash of the text
+- `functions/api/tts.js`: Cloudflare Pages Function used only to record new lines (Workers AI, Deepgram Aura 2, voices "pandora" (British, default) and "theia" (Australian)). It only speaks lines listed in `functions/api/tts-texts.json`
 - `tools/gen-audio.mjs`: builds that list and downloads any missing recordings
 
 ## Changing words or phrases
@@ -25,7 +25,8 @@ node tools/gen-audio.mjs texts
 Commit and push so the function knows the new lines, then record them and push again:
 
 ```bash
-node tools/gen-audio.mjs fetch https://spelling.world
+node tools/gen-audio.mjs fetch https://spelling.world pandora
+node tools/gen-audio.mjs fetch https://spelling.world theia
 ```
 
 ## Deploy
