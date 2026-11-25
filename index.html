@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spelling World</title>
+<meta name="description" content="Spelling World is a free spelling game for kids of every level. Spell words, level up, and fill five worlds with animals.">
+<meta name="theme-color" content="#FFF8ED">
+<meta property="og:title" content="Spelling World">
+<meta property="og:description" content="A free spelling adventure for kids of every level. Spell words, level up and fill five worlds with animals.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8D%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #FFF8ED; --card: #FFFFFF; --alt: #FFEFD6; --ink: #3A2E5C; --soft: #7A6F9B;
+    --coral: #FF6B6B; --coral-d: #E14F4F; --turq: #1FAFA8; --turq-d: #0F8E88;
+    --yellow: #FFC93C; --yellow-d: #E8AC10; --green: #4FAE3D; --green-d: #3B8A2D; --red: #E0483D; --purple: #8E6CEF;
+    --shadow: 0 6px 0 rgba(58,46,92,0.08), 0 10px 24px rgba(58,46,92,0.08);
+    --tint: #FFEFD6;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh; min-height: 100dvh; background: var(--bg); color: var(--ink);
+    font-family: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Segoe UI Rounded", "Nunito", "Arial Rounded MT Bold", system-ui, sans-serif;
+    display: flex; justify-content: center; overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+    transition: background 0.5s;
+  }
+  button, input { font-family: inherit; color: inherit; }
+  button { cursor: pointer; border: none; background: none; touch-action: manipulation; }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+  .app { position: relative; width: 100%; max-width: 620px; padding: 14px 16px 40px; display: flex; flex-direction: column; }
+  .screen { display: none; flex-direction: column; gap: 14px; }
+  .screen.active { display: flex; animation: screenIn 0.3s ease; }
+  @keyframes screenIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- top bar ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .brand .globe { font-size: 2rem; display: inline-block; animation: spinGlobe 9s ease-in-out infinite; }
+  @keyframes spinGlobe { 0%,80%,100% { transform: rotate(0); } 90% { transform: rotate(360deg); } }
+  .brand h1 { font-size: clamp(1.3rem, 5vw, 1.75rem); font-weight: 900; margin: 0; line-height: 1; white-space: nowrap; }
+  .brand h1 span { color: var(--coral); }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .chip-btn { display: flex; align-items: center; gap: 6px; background: var(--card); box-shadow: var(--shadow); border-radius: 16px; padding: 6px 12px 6px 8px; font-weight: 800; font-size: 0.92rem; height: 44px; max-width: 150px; }
+  .chip-btn .av { font-size: 1.5rem; }
+  .chip-btn .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 16px; background: var(--card); box-shadow: var(--shadow); font-size: 1.25rem; display: grid; place-items: center; }
+
+  .btn { font-weight: 900; border-radius: 18px; padding: 13px 20px; font-size: 1.02rem; color: #fff; background: var(--coral); box-shadow: 0 5px 0 var(--coral-d); transition: transform 0.08s, box-shadow 0.08s; white-space: nowrap; }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--coral-d); }
+  .btn.turq { background: var(--turq); box-shadow: 0 5px 0 var(--turq-d); }
+  .btn.turq:active { box-shadow: 0 1px 0 var(--turq-d); }
+  .btn.green { background: var(--green); box-shadow: 0 5px 0 var(--green-d); }
+  .btn.green:active { box-shadow: 0 1px 0 var(--green-d); }
+  .btn.soft { background: var(--alt); color: var(--ink); box-shadow: 0 4px 0 rgba(58,46,92,0.12); }
+  .btn.small { padding: 9px 14px; font-size: 0.9rem; border-radius: 14px; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.big { font-size: 1.25rem; padding: 16px 26px; border-radius: 22px; }
+  .btn.pulse { animation: pulseBtn 1.1s ease-in-out infinite; }
+  @keyframes pulseBtn { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+  .card { background: var(--card); border-radius: 28px; padding: 16px; box-shadow: var(--shadow); }
+
+  /* ---------- profiles ---------- */
+  .hello { text-align: center; padding: 8px 8px 0; }
+  .hello .big { font-size: 3.4rem; }
+  .hello h2 { margin: 4px 0 4px; font-size: 1.6rem; font-weight: 900; }
+  .hello p { margin: 0; color: var(--soft); font-weight: 700; }
+  .players { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .player { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); padding: 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 900; font-size: 1.05rem; transition: transform 0.12s; }
+  .player:hover { transform: translateY(-3px); }
+  .player .av { font-size: 3rem; }
+  .player small { color: var(--soft); font-weight: 800; font-size: 0.8rem; }
+  .player.add { background: transparent; box-shadow: none; border: 3px dashed rgba(58,46,92,0.25); color: var(--soft); }
+  .form label.l { display: block; font-weight: 900; margin: 14px 0 8px; }
+  .form input[type=text] { width: 100%; font-size: 1.3rem; font-weight: 800; padding: 12px 14px; border-radius: 16px; border: 3px solid var(--alt); background: var(--bg); }
+  .form input[type=text]:focus { outline: none; border-color: var(--turq); }
+  .avatars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .avatars button { aspect-ratio: 1; border-radius: 16px; background: var(--alt); font-size: 1.7rem; border: 3px solid transparent; }
+  .avatars button.sel { border-color: var(--turq); background: #fff; transform: scale(1.08); }
+  .stages { display: flex; flex-direction: column; gap: 8px; }
+  .stages button { display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 12px; border-radius: 16px; background: var(--alt); border: 3px solid transparent; font-weight: 800; }
+  .stages button.sel { border-color: var(--turq); background: #fff; }
+  .stages .ic { font-size: 1.7rem; }
+  .stages small { display: block; color: var(--soft); font-weight: 700; font-size: 0.8rem; }
+  .form .row { display: flex; gap: 10px; margin-top: 18px; }
+  .form .row .btn { flex: 1; }
+  .fine { text-align: center; color: var(--soft); font-weight: 700; font-size: 0.78rem; margin: 6px 0 0; }
+
+  /* ---------- home ---------- */
+  .level-card { display: flex; align-items: center; gap: 14px; }
+  .lvl-badge { width: 76px; height: 76px; min-width: 76px; border-radius: 50%; background: conic-gradient(var(--yellow), var(--coral), var(--purple), var(--turq), var(--yellow)); display: grid; place-items: center; }
+  .lvl-badge div { width: 62px; height: 62px; border-radius: 50%; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+  .lvl-badge small { font-size: 0.58rem; font-weight: 900; letter-spacing: 0.1em; color: var(--soft); }
+  .lvl-badge b { font-size: 1.7rem; font-weight: 900; }
+  .level-card .mid { flex: 1; min-width: 0; }
+  .level-card .wname { font-weight: 900; font-size: 1.05rem; }
+  .starbar { display: flex; gap: 3px; margin: 4px 0 2px; font-size: 1.25rem; }
+  .starbar span { filter: grayscale(1); opacity: 0.25; transition: all 0.3s; }
+  .starbar span.on { filter: none; opacity: 1; }
+  .starbar span.pop { animation: starPop 0.5s ease; }
+  .level-card .sub { color: var(--soft); font-weight: 700; font-size: 0.8rem; }
+  .level-card .streak { font-weight: 900; font-size: 0.82rem; background: var(--alt); border-radius: 999px; padding: 4px 10px; white-space: nowrap; align-self: flex-start; }
+  .play-row { display: flex; margin-top: 14px; }
+  .play-row .btn { flex: 1; }
+
+  .tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 1 0 auto; min-width: 58px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 10px; border-radius: 18px; background: var(--card); box-shadow: var(--shadow); font-weight: 900; font-size: 0.68rem; border: 3px solid transparent; position: relative; }
+  .tab .ic { font-size: 1.6rem; line-height: 1.1; }
+  .tab.sel { border-color: var(--coral); }
+  .tab.locked .ic { filter: grayscale(1); opacity: 0.4; }
+  .tab.locked { color: var(--soft); }
+  .tab .cnt { color: var(--soft); }
+
+  .scene-card { padding: 10px; }
+  .scene { position: relative; width: 100%; aspect-ratio: 5 / 3; border-radius: 20px; overflow: hidden; isolation: isolate; user-select: none; -webkit-user-select: none; background: var(--alt); }
+  .scene svg.land { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .scene.locked svg.land { filter: grayscale(0.9) brightness(0.8); }
+  .critters { position: absolute; inset: 0; z-index: 2; }
+  .lock-over { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,0.5); background: rgba(40,30,70,0.35); text-align: center; padding: 12px; }
+  .lock-over .ic { font-size: 3rem; }
+  .lock-over small { font-size: 0.85rem; font-weight: 800; }
+
+  .scenery { transform-box: fill-box; transform-origin: 50% 100%; opacity: 0; transform: scale(0.15); transition: opacity 0.6s ease, transform 0.9s cubic-bezier(.3,1.6,.5,1); }
+  .scenery.fade { transform: none; transition: opacity 1.4s ease; }
+  .scenery.on { opacity: 1; transform: none; }
+  .scene.instant .scenery { transition: none; }
+  .birds { animation: birdsFly 38s linear infinite; }
+  @keyframes birdsFly { from { transform: translateX(-140px); } to { transform: translateX(560px); } }
+  .flow { animation: flow 1.4s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -32; } }
+  .falls path { stroke-dasharray: 4 6; animation: flow 0.6s linear infinite; }
+  .bfly { animation: bfly 7s ease-in-out infinite; transform-box: fill-box; }
+  .bfly.b2 { animation-duration: 9s; animation-delay: -3s; }
+  @keyframes bfly { 0%,100% { transform: translate(0,0) rotate(-8deg); } 25% { transform: translate(18px,-14px) rotate(8deg); } 50% { transform: translate(34px,-4px) rotate(-6deg); } 75% { transform: translate(14px,-20px) rotate(6deg); } }
+  .sway { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 4s ease-in-out infinite; }
+  @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+  .bub { animation: bub 4s ease-in infinite; }
+  @keyframes bub { 0% { transform: translate(0,0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate(8px,-250px); opacity: 0; } }
+  .snowf { animation: snowf 10s linear infinite; }
+  @keyframes snowf { to { transform: translate(-24px, 320px); } }
+  .aurora { animation: aurora 6s ease-in-out infinite; }
+  @keyframes aurora { 0%,100% { opacity: 0.65; transform: translateX(0); } 50% { opacity: 1; transform: translateX(-12px); } }
+  .pulse { animation: pulseGlow 2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+  @keyframes pulseGlow { 0%,100% { opacity: 0.3; } 50% { opacity: 0.65; } }
+  .spark { animation: spark 2s ease-out infinite; }
+  @keyframes spark { 0% { transform: translate(0,0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
+  .glint { animation: glint 3s ease-in-out infinite; }
+  @keyframes glint { 0%,100% { opacity: 0.85; } 50% { opacity: 1; filter: brightness(1.25); } }
+
+  .critter { position: absolute; left: 50%; bottom: 10%; width: 0; height: 0; padding: 0; transition-property: left; transition-timing-function: linear; }
+  .critter .shadow { position: absolute; left: 50%; bottom: -4px; width: calc(var(--sz) * 0.9); height: calc(var(--sz) * 0.18); transform: translateX(-50%); border-radius: 50%; background: rgba(40,25,10,0.2); }
+  .critter.flyer .shadow { display: none; }
+  .critter .face { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%) scaleX(var(--dir, 1)); transition: transform 0.25s; }
+  .critter .body { display: block; font-size: var(--sz); line-height: 1; transform-origin: 50% 100%; animation: breathe 3s ease-in-out infinite; }
+  .critter.walking .body { animation: walk 0.42s ease-in-out infinite; }
+  .critter.hopping .body { animation: hop 0.6s ease-out 2; }
+  .critter.jump .body { animation: bigjump 0.7s cubic-bezier(.3,1.6,.5,1); }
+  .critter.flyer .body { animation: flutter 1.6s ease-in-out infinite; }
+  .critter.flyer.walking .body { animation: flutter 0.7s ease-in-out infinite; }
+  .critter.flyer.jump .body { animation: bigjump 0.7s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes breathe { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.03,0.97); } }
+  @keyframes walk { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-14%) rotate(3deg); } }
+  @keyframes hop { 0%,100% { transform: translateY(0) scale(1,1); } 15% { transform: translateY(0) scale(1.1,0.88); } 50% { transform: translateY(-45%) scale(0.95,1.06); } }
+  @keyframes bigjump { 0% { transform: translateY(0) scale(1.15,0.85); } 45% { transform: translateY(-70%) scale(0.92,1.1) rotate(-8deg); } 100% { transform: translateY(0) scale(1,1); } }
+  @keyframes flutter { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-18%) rotate(4deg); } }
+  .critter .bubble { position: absolute; left: 50%; bottom: calc(var(--sz) * 1.15); transform: translateX(-50%) scale(0.6); white-space: nowrap; background: #fff; color: #3A2E5C; font-weight: 800; font-size: 0.78rem; padding: 5px 10px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.18); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 200; }
+  .critter .bubble::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #fff; }
+  .critter.talk { z-index: 300 !important; }
+  .critter.talk .bubble { opacity: 1; transform: translateX(-50%) scale(1); }
+  .critter .new-tag { position: absolute; left: 50%; bottom: calc(var(--sz) * 1.05); transform: translateX(-50%); background: var(--coral); color: #fff; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.08em; padding: 3px 7px; border-radius: 8px; animation: tagBob 1s ease-in-out infinite; pointer-events: none; }
+  @keyframes tagBob { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,-4px); } }
+  .critter.talk .new-tag { display: none; }
+  .sparkle { position: absolute; z-index: 400; pointer-events: none; font-size: 1rem; animation: sparkle 0.9s ease-out forwards; }
+  @keyframes sparkle { 0% { opacity: 1; transform: translate(0,0) scale(0.4); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.2); } }
+  .scene .empty { position: absolute; left: 50%; bottom: 12%; transform: translateX(-50%); z-index: 3; width: 84%; text-align: center; background: rgba(255,255,255,0.9); color: #3A2E5C; border-radius: 18px; padding: 10px 14px; font-weight: 800; font-size: 0.9rem; box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+
+  .scene-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 6px 2px; }
+  .scene-meta .title { font-weight: 900; font-size: 1.1rem; }
+  .scene-meta .count { font-weight: 800; font-size: 0.82rem; color: var(--soft); background: var(--alt); padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
+  .next-up { margin: 8px 6px 0; padding: 9px 12px; border-radius: 14px; background: var(--alt); font-weight: 800; font-size: 0.86rem; color: var(--soft); }
+  .next-up b { color: var(--ink); }
+  .collection { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; padding: 12px 4px 4px; }
+  .collection .slot { aspect-ratio: 1; border-radius: 16px; background: var(--alt); display: grid; place-items: center; font-size: 2.2rem; line-height: 1; }
+  .collection .slot.locked span { filter: brightness(0); opacity: 0.16; }
+  @media (max-width: 480px) { .collection { grid-template-columns: repeat(4, 1fr); gap: 10px; } .collection .slot { font-size: 2.6rem; } }
+  .practice-row { display: flex; padding: 10px 4px 2px; }
+  .practice-row .btn { flex: 1; }
+
+  /* ---------- game ---------- */
+  .g-head { display: flex; align-items: center; gap: 10px; }
+  .g-head .quit { width: 40px; height: 40px; border-radius: 14px; background: var(--card); box-shadow: var(--shadow); font-weight: 900; font-size: 1.1rem; color: var(--soft); }
+  .g-head .title { font-weight: 900; font-size: 0.85rem; color: var(--soft); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dots { display: flex; gap: 6px; flex: 1; justify-content: center; }
+  .dots i { width: 13px; height: 13px; border-radius: 50%; background: rgba(58,46,92,0.16); transition: all 0.2s; }
+  .dots i.first { background: var(--green); } .dots i.ok { background: var(--yellow); } .dots i.miss { background: var(--coral); }
+  .dots i.cur { background: var(--purple); transform: scale(1.3); }
+  .combo { font-weight: 900; font-size: 0.95rem; min-width: 46px; text-align: right; opacity: 0; transition: opacity 0.2s; }
+  .combo.on { opacity: 1; animation: starPop 0.4s ease; }
+
+  .q-card { position: relative; text-align: center; padding: 16px 14px 14px; border-radius: 30px; }
+  .q-pic { font-size: 5.2rem; line-height: 1.1; display: inline-block; animation: pop 0.4s cubic-bezier(.3,1.5,.5,1); }
+  .q-pic.happy { animation: happy 0.7s ease; }
+  .q-pic.speaker { width: 96px; height: 96px; border-radius: 50%; background: var(--alt); font-size: 2.8rem; display: inline-grid; place-items: center; box-shadow: 0 5px 0 rgba(58,46,92,0.12); }
+  .q-pic.speaker:active { transform: translateY(3px); }
+  @keyframes pop { from { transform: scale(0.4) rotate(-10deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+  @keyframes happy { 0%,100% { transform: scale(1) rotate(0); } 30% { transform: scale(1.25) rotate(-8deg); } 60% { transform: scale(0.95) rotate(6deg); } }
+  .q-sentence { font-weight: 800; font-size: 1.08rem; margin: 8px 6px 0; line-height: 1.4; }
+  .q-sentence .blank { display: inline-block; min-width: 3.2em; border-bottom: 4px solid var(--purple); margin: 0 3px; transform: translateY(2px); color: var(--green); }
+  .q-tools { display: flex; justify-content: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .tool { background: var(--alt); border-radius: 14px; padding: 8px 12px; font-weight: 900; font-size: 0.86rem; }
+  .tool:disabled { opacity: 0.4; }
+  .slots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+  .slots .s { flex: 1 1 0; max-width: 46px; height: 54px; border-radius: 13px; background: var(--alt); display: grid; place-items: center; font-size: 1.7rem; font-weight: 900; border-bottom: 4px solid rgba(58,46,92,0.15); transition: transform 0.12s, background 0.2s; padding: 0; min-width: 0; }
+  .slots.long { gap: 4px; } .slots.long .s { font-size: 1.3rem; height: 48px; border-radius: 10px; }
+  .slots.xlong { gap: 3px; } .slots.xlong .s { font-size: 1.02rem; height: 42px; border-radius: 8px; border-bottom-width: 3px; }
+  .slots .s.filled { background: var(--yellow); transform: translateY(-3px); }
+  .slots .s.next { box-shadow: inset 0 0 0 3px var(--purple); }
+  .slots .s.locked { background: var(--green); color: #fff; }
+  .slots .s.wrong { background: var(--coral); color: #fff; animation: shake 0.4s; }
+  .slots .s.reveal { background: var(--turq); color: #fff; }
+  .slots.nudge { animation: shake 0.35s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+  .feedback { min-height: 26px; text-align: center; font-weight: 800; font-size: 1rem; }
+  .feedback.good { color: var(--green-d); } .feedback.bad { color: var(--red); } .feedback.info { color: var(--soft); }
+
+  .tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .tile { width: 60px; height: 60px; border-radius: 18px; background: var(--card); box-shadow: 0 5px 0 rgba(58,46,92,0.15), 0 8px 16px rgba(58,46,92,0.08); font-size: 1.9rem; font-weight: 900; transition: transform 0.1s, opacity 0.15s; }
+  .tile:active { transform: translateY(4px); }
+  .tile.used { opacity: 0; pointer-events: none; transform: scale(0.6); }
+  .tiles.nudge { animation: shake 0.35s; }
+  .kb { display: flex; flex-direction: column; gap: 6px; }
+  .kb .r { display: flex; gap: 5px; justify-content: center; }
+  .kb button { flex: 1 1 0; max-width: 52px; height: 50px; border-radius: 12px; background: var(--card); box-shadow: 0 3px 0 rgba(58,46,92,0.15); font-size: 1.25rem; font-weight: 800; padding: 0; min-width: 0; }
+  .kb button:active { transform: translateY(2px); background: var(--alt); }
+  .kb button.wide { flex: 1.6 1 0; max-width: 84px; font-size: 1.1rem; background: var(--alt); }
+  .g-actions { display: flex; gap: 10px; }
+  .g-actions .btn { flex: 1; }
+  .g-actions .btn.soft { flex: 0 0 auto; background: var(--card); }
+
+  /* ---------- results ---------- */
+  .res { text-align: center; padding: 22px 18px; border-radius: 30px; }
+  .stars { font-size: 2.8rem; letter-spacing: 6px; }
+  .stars span { display: inline-block; opacity: 0.2; transform: scale(0.6); filter: grayscale(1); }
+  .stars span.on { opacity: 1; filter: none; animation: starPop 0.45s ease forwards; }
+  @keyframes starPop { from { transform: scale(0.3) rotate(-15deg); } 60% { transform: scale(1.3) rotate(6deg); } to { transform: scale(1) rotate(0); } }
+  .res .score { font-size: 2rem; font-weight: 900; }
+  .res .msg { font-weight: 700; color: var(--soft); }
+  .lvl-box { margin: 14px auto 0; max-width: 400px; background: var(--alt); border-radius: 20px; padding: 12px 14px; font-weight: 800; }
+  .lvl-box.up { background: linear-gradient(120deg, #FFE27A, #FFB0A0, #C9B3FF); color: #3A2E5C; animation: happy 0.8s ease; }
+  .lvl-box .t { font-weight: 900; font-size: 1.15rem; }
+  .lvl-box.up .t { font-size: 1.5rem; }
+  .lvl-box .starbar { justify-content: center; font-size: 1.5rem; }
+  .lvl-box small { display: block; color: var(--soft); font-size: 0.82rem; font-weight: 700; }
+  .lvl-box.up small { color: #3A2E5C; }
+  .reward { margin: 14px auto 0; padding: 14px 14px 14px; border-radius: 22px; background: var(--alt); max-width: 400px; position: relative; overflow: hidden; }
+  .reward .stage { height: 110px; display: grid; place-items: center; position: relative; }
+  .reward .gift { font-size: 4.4rem; display: inline-block; animation: giftShake 0.5s ease-in-out infinite; }
+  @keyframes giftShake { 0%,100% { transform: rotate(0) scale(1); } 25% { transform: rotate(-9deg) scale(1.04); } 75% { transform: rotate(9deg) scale(1.04); } }
+  .reward .gift.open { animation: giftOpen 0.4s ease-in forwards; }
+  @keyframes giftOpen { to { transform: scale(1.6); opacity: 0; } }
+  .reward .prize { font-size: 5rem; display: inline-block; animation: prizeIn 0.8s cubic-bezier(.3,1.6,.5,1) forwards, prizeDance 1.4s 0.8s ease-in-out infinite; position: relative; }
+  @keyframes prizeIn { from { transform: scale(0) rotate(-30deg) translateY(30px); } to { transform: scale(1) rotate(0) translateY(0); } }
+  @keyframes prizeDance { 0%,100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-10px) rotate(-6deg); } 75% { transform: translateY(-10px) rotate(6deg); } }
+  .reward .rays { position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; margin: -110px 0 0 -110px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(255,201,60,0.5) 0 12deg, transparent 12deg 30deg); animation: spin 8s linear infinite; opacity: 0; transition: opacity 0.5s; }
+  .reward.revealed .rays { opacity: 1; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .reward .peek { font-size: 3.8rem; filter: brightness(0); opacity: 0.18; }
+  .reward .r-title { font-weight: 900; font-size: 1.1rem; position: relative; }
+  .reward .r-sub { font-weight: 700; color: var(--soft); font-size: 0.88rem; margin-top: 3px; position: relative; }
+  .wordlist { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 14px 0 0; }
+  .wordlist button { background: var(--alt); border-radius: 12px; padding: 6px 10px; font-weight: 800; font-size: 0.92rem; border-left: 5px solid var(--green); }
+  .wordlist button.ok { border-left-color: var(--yellow); }
+  .wordlist button.miss { border-left-color: var(--coral); }
+  .res-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+
+  .confetti { position: fixed; top: -20px; width: 10px; height: 16px; z-index: 900; pointer-events: none; animation: fall linear forwards; border-radius: 2px; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(600deg); } }
+
+  /* ---------- modal ---------- */
+  .modal { position: fixed; inset: 0; z-index: 800; background: rgba(40,30,70,0.5); display: none; align-items: flex-end; justify-content: center; }
+  .modal.open { display: flex; }
+  .sheet { background: var(--bg); width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; border-radius: 28px 28px 0 0; padding: 18px 18px 26px; animation: sheetIn 0.25s ease; }
+  @media (min-width: 560px) { .modal { align-items: center; } .sheet { border-radius: 28px; } }
+  @keyframes sheetIn { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .sheet h2 { margin: 0 0 4px; font-size: 1.3rem; font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
+  .sheet h3 { margin: 16px 0 8px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--soft); }
+  .set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--card); border-radius: 16px; padding: 10px 14px; font-weight: 800; margin-bottom: 8px; }
+  .set-row small { display: block; color: var(--soft); font-weight: 700; font-size: 0.78rem; }
+  .seg { display: flex; background: var(--alt); border-radius: 12px; padding: 3px; }
+  .seg button { padding: 7px 12px; border-radius: 10px; font-weight: 900; font-size: 0.85rem; white-space: nowrap; }
+  .seg button.on { background: var(--turq); color: #fff; }
+  .stepper { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+  .stepper button { width: 36px; height: 36px; border-radius: 12px; background: var(--alt); font-weight: 900; font-size: 1.2rem; }
+  .danger { color: var(--red); font-weight: 800; text-decoration: underline; text-underline-offset: 3px; font-size: 0.85rem; padding: 8px 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="globe" aria-hidden="true">🌍</span><h1>Spelling <span>World</span></h1></div>
+    <div class="top-actions">
+      <button class="chip-btn" id="playerChip" type="button" aria-label="Change player" hidden><span class="av" id="chipAv"></span><span class="nm" id="chipName"></span></button>
+      <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- WHO IS PLAYING -->
+  <main id="profiles" class="screen">
+    <div id="pickView">
+      <div class="hello"><div class="big" aria-hidden="true">👋</div><h2>Who is playing?</h2><p>Pick your explorer</p></div>
+      <div class="players" id="playerList" style="margin-top:16px"></div>
+    </div>
+    <div id="newView" class="card form" hidden>
+      <div class="hello"><div class="big" aria-hidden="true">🧭</div><h2>New explorer</h2><p>Spell words to fill five worlds with animals</p></div>
+      <label class="l" for="nameInput">Your name</label>
+      <input type="text" id="nameInput" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Type your first name">
+      <label class="l">Pick your explorer</label>
+      <div class="avatars" id="avatarGrid"></div>
+      <label class="l">Where do you want to start?</label>
+      <div class="stages" id="stageList"></div>
+      <div class="row">
+        <button class="btn soft" id="cancelNew" type="button">Back</button>
+        <button class="btn green" id="createBtn" type="button">Let's go!</button>
+      </div>
+      <p class="fine">Names stay on this device. No accounts, no ads, no tracking.</p>
+    </div>
+  </main>
+
+  <!-- HOME -->
+  <main id="home" class="screen">
+    <section class="card">
+      <div class="level-card">
+        <div class="lvl-badge"><div><small>LEVEL</small><b id="lvlNum">1</b></div></div>
+        <div class="mid">
+          <div class="wname" id="lvlWorld"></div>
+          <div class="starbar" id="lvlStars" aria-hidden="true"></div>
+          <div class="sub" id="lvlSub"></div>
+        </div>
+        <div class="streak" id="streak" hidden></div>
+      </div>
+      <div class="play-row"><button class="btn green big" id="playBtn" type="button">▶ Play</button></div>
+    </section>
+
+    <nav class="tabs" id="tabs" aria-label="Worlds"></nav>
+
+    <section class="card scene-card">
+      <div class="scene" id="scene"><div id="sceneSvg"></div><div class="critters" id="critters"></div></div>
+      <div class="scene-meta"><div class="title" id="sceneTitle"></div><div class="count" id="sceneCount"></div></div>
+      <div class="next-up" id="nextUp"></div>
+      <div class="collection" id="collection"></div>
+      <div class="practice-row" id="practiceRow" hidden><button class="btn turq" id="practiceBtn" type="button"></button></div>
+    </section>
+  </main>
+
+  <!-- GAME -->
+  <section id="game" class="screen" aria-label="Spelling round">
+    <div class="g-head">
+      <button class="quit" id="quitBtn" type="button" aria-label="Stop and go back">✕</button>
+      <div class="dots" id="dots"></div>
+      <div class="combo" id="combo"></div>
+    </div>
+    <div class="card q-card">
+      <div class="g-head" style="justify-content:center;margin-bottom:6px"><div class="title" id="gTitle"></div></div>
+      <div id="qPicWrap"></div>
+      <div class="q-sentence" id="qSentence"></div>
+      <div class="slots" id="slots" role="group" aria-label="Your spelling"></div>
+      <div class="q-tools">
+        <button class="tool" id="hearBtn" type="button">🔊 Hear it</button>
+        <button class="tool" id="slowBtn" type="button">🐢 Slowly</button>
+        <button class="tool" id="hintBtn" type="button">💡 Hint</button>
+      </div>
+    </div>
+    <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+    <div class="tiles" id="tiles"></div>
+    <div class="kb" id="kb"></div>
+    <div class="g-actions">
+      <button class="btn soft" id="delBtn" type="button" aria-label="Delete last letter">⌫</button>
+      <button class="btn turq" id="checkBtn" type="button">Check</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="screen" aria-label="Results">
+    <div class="card res">
+      <div class="stars" id="resStars"></div>
+      <div class="score" id="resScore"></div>
+      <div class="msg" id="resMsg"></div>
+      <div class="lvl-box" id="lvlBox"></div>
+      <div class="reward" id="reward" aria-live="polite"></div>
+      <div class="wordlist" id="wordList"></div>
+      <div class="res-actions">
+        <button class="btn green" id="againBtn" type="button">Keep playing</button>
+        <button class="btn soft" id="worldBtn" type="button">See my world</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SETTINGS -->
+<div class="modal" id="settings" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="sheet">
+    <h2>Settings <button class="icon-btn" id="closeSettings" type="button" aria-label="Close">✕</button></h2>
+    <h3>Sound</h3>
+    <div class="set-row"><div>Sound effects</div><div class="seg" id="segSound"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div></div>
+    <div class="set-row"><div>Read words aloud<small>Needed for the harder levels</small></div><div class="seg" id="segVoice"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div></div>
+    <h3>Spelling</h3>
+    <div class="set-row"><div>Word spellings<small id="spellEg"></small></div><div class="seg" id="segSpell"><button data-v="0" type="button">NZ / UK</button><button data-v="1" type="button">US</button></div></div>
+    <div id="playerSettings">
+      <h3>For grown-ups: <span id="setName"></span></h3>
+      <div class="set-row"><div>Level<small>Move up or down if the words are too easy or too hard</small></div><div class="stepper"><button id="lvlDown" type="button" aria-label="Lower level">−</button><span id="setLvl">1</span><button id="lvlUp" type="button" aria-label="Raise level">+</button></div></div>
+      <button class="danger" id="deletePlayer" type="button">Delete this player</button>
+    </div>
+    <p class="fine" style="text-align:left">Spelling World saves progress in this browser only. There are no accounts, ads or tracking, and nothing a child types leaves the device.</p>
+  </div>
+</div>
+
+<script>
+// Word lists. 20 levels, harder each time. Format: word[/american]|emoji or sentence with _ for the blank
+var RAW = [
+// ---- World 1: picture words ----
+"cat|🐱;dog|🐶;sun|☀️;hat|🎩;pig|🐷;bus|🚌;bed|🛏️;fox|🦊;cup|☕;bee|🐝;ant|🐜;owl|🦉;bat|🦇;egg|🥚;pie|🥧;car|🚗;van|🚐;bug|🐛;key|🔑;box|📦;cow|🐮;hen|🐔",
+"fish|🐟;bird|🐦;star|⭐;moon|🌙;ball|⚽;tree|🌳;frog|🐸;duck|🦆;book|📖;milk|🥛;corn|🌽;cake|🍰;ship|🚢;boat|⛵;bike|🚲;crab|🦀;bear|🐻;lion|🦁;door|🚪;sock|🧦",
+"drum|🥁;ring|💍;kite|🪁;leaf|🍃;rain|🌧️;fire|🔥;hand|✋;nose|👃;bell|🔔;bone|🦴;coat|🧥;shoe|👟;gift|🎁;lock|🔒;rose|🌹;goat|🐐;wolf|🐺;tent|⛺;pear|🍐;bowl|🥣",
+"apple|🍎;horse|🐴;mouse|🐭;snake|🐍;whale|🐳;tiger|🐯;zebra|🦓;sheep|🐑;house|🏠;train|🚂;plane|✈️;truck|🚚;bread|🍞;pizza|🍕;grape|🍇;lemon|🍋;chair|🪑;clock|🕐;cloud|☁️;heart|❤️;crown|👑;robot|🤖;ghost|👻;shark|🦈",
+// ---- World 2 ----
+"when|Tell me _ you are ready.;what|_ is your name?;they|_ are my best friends.;said|She _ hello to me.;have|I _ two brothers.;were|We _ at the park.;come|Please _ and play.;some|Can I have _ water?;like|I _ to ride my bike.;went|We _ to the beach.;here|Come over _ and sit down.;very|The soup is _ hot.;your|Is this _ bag?;from|This letter is _ my nan.;play|Let us _ a game.;look|_ at that big truck!;want|I _ a turn on the swing.;make|We can _ a card for Dad.;down|The ball rolled _ the hill.;home|It is time to go _.",
+"school|We learn to read at _.;friend|My best _ lives next door.;because|I wore a coat _ it was cold.;people|Lots of _ came to the show.;water|Plants need _ to grow.;would|_ you like a drink?;could|I _ hear the birds singing.;there|Put the box over _.;their|The kids hung up _ bags.;where|_ did you put my shoes?;again|Can we play that game _?;about|This book is _ a dragon.;little|The _ kitten is asleep.;mother|My _ reads to me at night.;father|His _ drives a bus.;sister|My big _ plays the drums.;brother|Her little _ is two.;happy|I feel _ when the sun shines.;night|The stars come out at _.;light|Turn on the _ so we can see.",
+"always|I _ brush my teeth before bed.;around|We ran _ the field.;before|Wash your hands _ you eat.;another|May I have _ slice of toast?;animal|A tiger is a wild _.;garden|We grow beans in the _.;morning|I eat breakfast every _.;pretty|The flowers look very _.;thought|I _ the film was funny.;through|The train went _ a tunnel.;caught|She _ the ball with one hand.;laugh|That joke made me _.;watch|We like to _ the waves.;every|I walk the dog _ day.;write|Please _ your name at the top.;right|Turn _ at the corner.;know|I _ how to tie my laces.;knew|He _ the answer straight away.;many|How _ apples are in the bowl?;once|I have only been there _.",
+"birthday|I had a party on my _.;beautiful|What a _ sunset!;different|These two shells look _.;tomorrow|We are going swimming _.;yesterday|It rained all day _.;suddenly|_ the lights went out.;favourite/favorite|Pizza is my _ food.;surprise|The party was a big _.;together|We built the fort _.;important|It is _ to wear a helmet.;question|Put up your hand to ask a _.;answer|Do you know the _ to number five?;enough|Have you had _ to eat?;colour/color|Green is the _ of grass.;picture|She drew a _ of a horse.;treasure|The pirates buried their _.;minute|Wait here for one _.;island|We sailed to a tiny _.;bridge|We walked over the _.;climb|Monkeys love to _ trees.",
+// ---- World 3 ----
+"believe|I _ you are telling the truth.;breathe|Fish can _ under water.;building|That tall _ has fifty floors.;century|A _ is one hundred years.;certain|Are you _ you locked the door?;circle|We sat in a _ on the mat.;complete|Please _ the puzzle.;describe|Can you _ what you saw?;decide|I cannot _ which one to pick.;difficult|The last question was _.;early|We got up _ to see the sunrise.;earth|The _ travels around the sun.;eight|A spider has _ legs.;exercise|Running is good _.;experience|The trip was a great _.;famous|She is a _ singer.;February|_ is the second month of the year.;forward|Take two steps _.;fruit|An apple is a kind of _.;grammar|Good _ makes writing clear.",
+"guard|A _ stood at the gate.;guide|The _ showed us around the cave.;heard|I _ a strange noise.;height|The nurse measured my _.;history|We learned about the _ of flight.;imagine|_ you could fly like a bird.;increase|The crowd began to _.;interest|She has an _ in space.;knowledge|Reading builds your _.;learn|I want to _ to surf.;length|Measure the _ of the table.;library|I borrowed three books from the _.;material|Cotton is a soft _.;medicine|The doctor gave me some _.;mention|Did he _ the party?;natural|Honey is a _ sweetener.;naughty|The _ puppy chewed my shoe.;notice|Did you _ my new haircut?;occasion|A wedding is a special _.;often|We _ go to the park.",
+"opposite|Hot is the _ of cold.;ordinary|It was just an _ day.;particular|Is there a _ book you want?;peculiar|The soup had a _ smell.;perhaps|_ it will be sunny later.;popular|Football is a _ sport.;position|Get into the starting _.;possess|Dragons _ great treasure in stories.;possible|Is it _ to finish today?;potatoes|We had mashed _ for dinner.;pressure|Deep water has a lot of _.;probably|It will _ rain this afternoon.;promise|I _ to feed the cat.;purpose|What is the _ of this button?;quarter|I ate a _ of the pizza.;recent|Our most _ trip was to the zoo.;regular|Brush your teeth on a _ basis.;remember|Did you _ your lunch?;sentence|Write a _ using this word.;separate|Please _ the eggs from the shells.",
+"special|Today is a very _ day.;straight|Draw a _ line with your ruler.;strange|We heard a _ sound in the attic.;strength|Lifting weights builds _.;suppose|I _ we could try again.;therefore|It rained and _ the game was off.;although|_ it was late, we kept reading.;various|The shop sells _ kinds of tea.;weight|What is the _ of this parcel?;woman|The _ next door is a pilot.;neighbour/neighbor|Our _ has a noisy dog.;centre/center|Stand in the _ of the room.;theatre/theater|We saw a play at the _.;honour/honor|It is an _ to meet you.;travelled/traveled|We _ by train last summer.;jewellery/jewelry|She keeps her _ in a box.;calendar|Mark the date on the _.;disappear|The magician made the coin _.;business|My aunt runs her own _.;aeroplane/airplane|The _ landed on the runway.",
+// ---- World 4 ----
+"accommodate|The hall can _ two hundred people.;accompany|I will _ you to the station.;according|_ to the map, we are nearly there.;achieve|You can _ your goal with practice.;aggressive|The _ goose chased us away.;amateur|He is an _ photographer.;ancient|The _ temple is two thousand years old.;apparent|It was _ that he was tired.;appreciate|I really _ your help.;attached|A note was _ to the door.;available|Are any seats still _?;average|The _ of two and four is three.;awkward|There was an _ silence.;bargain|That coat was a real _.;bruise|I have a _ on my knee.;category|Pick a _ for the quiz.;cemetery|The old _ is behind the church.;committee|The _ meets every Tuesday.;communicate|Dolphins _ with clicks and whistles.;community|Our _ planted a garden together.",
+"competition|She won the swimming _.;conscience|My _ told me to tell the truth.;conscious|He was _ of everyone watching.;controversy|The new rule caused a _.;convenience|The shop is open late for your _.;correspond|The two friends _ by letter.;criticise/criticize|Please do not _ her painting.;curiosity|The cat was full of _.;definite|We need a _ answer by Friday.;desperate|The team was _ to score.;determined|She was _ to finish the race.;develop|Tadpoles _ into frogs.;dictionary|Look up the word in a _.;disastrous|The flood was _ for the town.;embarrass|Please do not _ me in front of my friends.;environment|We must protect the _.;equipment|Pack your camping _.;especially|I love fruit, _ mangoes.;exaggerate|Fishermen often _ the size of the catch.;excellent|That was an _ goal.",
+"existence|Scientists proved the _ of the planet.;explanation|The teacher gave a clear _.;familiar|Your face looks _.;foreign|She collects _ coins.;forty|Twenty plus twenty is _.;frequently|Buses run _ on this route.;government|The _ passed a new law.;guarantee|The watch comes with a two year _.;harass|It is wrong to _ animals.;hindrance|The heavy bag was a _ on the walk.;identity|The hero kept her _ a secret.;immediate|The fire needed _ attention.;individual|Each _ gets one vote.;interfere|Do not _ with the experiment.;interrupt|Please do not _ while I am speaking.;language|Spanish is a beautiful _.;leisure|He reads in his _ time.;lightning|Thunder follows _.;marvellous/marvelous|We had a _ time at the fair.;mischievous|The _ kitten knocked over the vase.",
+"muscle|The heart is a strong _.;necessary|It is _ to wear a seatbelt.;nuisance|The buzzing fly was a _.;occupy|Puzzles _ my mind for hours.;occur|Eclipses _ only a few times a year.;opportunity|This is a great _ to learn.;parliament|Laws are debated in _.;persuade|Can I _ you to join the team?;physical|Swimming is a _ activity.;prejudice|We should judge fairly and without _.;privilege|It is a _ to be here.;profession|Nursing is a caring _.;programme/program|We watched a _ about whales.;pronunciation|Her _ of French words is perfect.;queue|We waited in a long _.;recognise/recognize|I did not _ you in that hat.;recommend|Can you _ a good book?;relevant|Stick to the _ facts.;restaurant|We ate dinner at a _.;rhythm|Clap along to the _.",
+// ---- World 5 ----
+"sacrifice|Parents often _ sleep for their babies.;secretary|The _ answered the phone.;shoulder|The parrot sat on his _.;signature|Please add your _ at the bottom.;sincerely|She ended the letter with yours _.;soldier|The _ stood to attention.;stomach|My _ rumbles when I am hungry.;sufficient|We have _ food for a week.;suggest|I _ we leave early.;symbol|A dove is a _ of peace.;system|The solar _ has eight planets.;temperature|The _ dropped below zero.;thorough|Give your room a _ clean.;twelfth|December is the _ month.;variety|The market sells a _ of cheeses.;vegetable|A carrot is a root _.;vehicle|A bus is a large _.;yacht|The _ sailed across the bay.;apparatus|The gym has climbing _.;behaviour/behavior|The class was praised for good _.",
+"acquaintance|He is an _ rather than a close friend.;acquire|It takes time to _ a new skill.;anonymous|The gift came from an _ donor.;bureaucracy|The forms were lost in the _.;camouflage|A chameleon uses _ to hide.;catastrophe|The earthquake was a _.;colleague|My _ at work helped me.;conscientious|She is a _ student who checks her work.;courageous|The _ firefighter saved the dog.;deceive|Magicians _ the eye.;dilemma|Choosing between them was a real _.;entrepreneur|The young _ started her own company.;fluorescent|The cyclist wore a _ jacket.;gauge|The fuel _ showed empty.;hierarchy|Wolves live in a strict _.;illiterate|An _ person cannot read.;independent|Cats are very _ animals.;indispensable|A map is _ on this hike.;inoculate|Vets _ puppies against disease.;irresistible|The smell of fresh bread was _.",
+"liaison|She works as a _ between the two teams.;maintenance|The lift is closed for _.;manoeuvre/maneuver|The pilot made a tricky _.;millennium|A _ is one thousand years.;miniature|He built a _ railway.;miscellaneous|The drawer was full of _ bits and pieces.;noticeable|There was a _ change in the weather.;occurrence|Snow here is a rare _.;perseverance|Learning the violin takes _.;pharaoh|The _ ruled ancient Egypt.;playwright|The _ wrote ten plays.;questionnaire|Please fill in this short _.;reminiscent|The smell was _ of summer.;rendezvous|The spies planned a secret _.;resuscitate|Lifeguards learn how to _ swimmers.;sergeant|The _ gave the order.;silhouette|We saw the _ of a ship at sunset.;supersede|The new model will _ the old one.;surveillance|The bank is under video _.;threshold|He paused on the _ of the room.",
+"onomatopoeia|Buzz and splash are examples of _.;idiosyncrasy|Humming while he worked was his _.;pneumonia|She stayed in bed with _.;psychology|He studies _ to understand the mind.;chrysanthemum|A _ is a flower with many petals.;mnemonic|A rhyme can be a useful _.;pseudonym|The author wrote under a _.;quintessential|Fish and chips is the _ seaside meal.;sacrilegious|Some thought the joke was _.;vacuum|Sound cannot travel through a _.;connoisseur|The cheese _ tasted every sample.;bouquet|The bride carried a _ of roses.;chauffeur|The _ opened the car door.;fuchsia|Her dress was bright _.;handkerchief|He wiped his nose with a _.;hippopotamus|The _ wallowed in the river.;kaleidoscope|Turn the _ to see new patterns.;lieutenant|The _ led the patrol.;rhinoceros|A _ has a horn on its nose.;xylophone|She played a tune on the _."
+];
+var ALL = {};
+var LEVELS = RAW.map(function (line, li) {
+  return line.split(";").map(function (entry) {
+    var parts = entry.split("|"), ws = parts[0].split("/");
+    var it = { w: ws[0], us: ws[1] || null, e: null, s: null, level: li + 1 };
+    for (var i = 1; i < parts.length; i++) { if (parts[i].indexOf("_") !== -1) it.s = parts[i]; else it.e = parts[i]; }
+    ALL[it.w] = it;
+    return it;
+  });
+});
+// ---------- Scene drawing helpers (all return SVG strings, viewBox 500 x 300) ----------
+var S = {
+  at: function (x, y, s, inner) { return '<g transform="translate(' + x + ' ' + y + ') scale(' + (s || 1) + ')">' + inner + '</g>'; },
+  acacia: function (x, y, s, leaf, trunk) {
+    return S.at(x, y, s, '<rect x="-3.5" y="-74" width="7" height="76" rx="3" fill="' + trunk + '"/>' +
+      '<path d="M0 -52 L-21 -70 M1 -57 L23 -72" stroke="' + trunk + '" stroke-width="5" stroke-linecap="round"/>' +
+      '<ellipse cx="0" cy="-80" rx="52" ry="15" fill="' + leaf + '"/><ellipse cx="-17" cy="-88" rx="26" ry="10" fill="' + leaf + '"/><ellipse cx="20" cy="-89" rx="24" ry="9" fill="' + leaf + '"/>');
+  },
+  pine: function (x, y, s, c, trunk) {
+    return S.at(x, y, s, '<rect x="-3" y="-10" width="6" height="12" fill="' + trunk + '"/>' +
+      '<path d="M-22 -8 L0 -40 L22 -8Z M-17 -28 L0 -58 L17 -28Z M-12 -46 L0 -72 L12 -46Z" fill="' + c + '"/>' +
+      '<path d="M-7 -63 L0 -72 L7 -63 Q0 -59 -7 -63Z M-10 -44 L0 -58 L10 -44 Q0 -39 -10 -44Z M-13 -24 L0 -40 L13 -24 Q0 -18 -13 -24Z" fill="#FFFFFF" opacity="0.92"/>');
+  },
+  palm: function (x, y, s, leaf, trunk) {
+    return S.at(x, y, s, '<g fill="none" stroke-linecap="round"><path d="M0 0 Q-5 -24 4 -48" stroke="' + trunk + '" stroke-width="4.5"/>' +
+      '<g stroke="' + leaf + '" stroke-width="4"><path d="M4 -48 q-12 -6 -24 5"/><path d="M4 -48 q12 -7 24 4"/><path d="M4 -48 q-4 -13 -18 -13"/><path d="M4 -48 q6 -13 20 -10"/><path d="M4 -48 q0 -10 2 -18"/></g></g>');
+  },
+  jtree: function (x, y, s, leaf, leaf2, trunk) {
+    return S.at(x, y, s, '<path d="M-8 0 Q-4 -40 -5 -82 L5 -82 Q4 -40 9 0Z" fill="' + trunk + '"/>' +
+      '<g fill="' + leaf + '"><circle cx="-22" cy="-88" r="24"/><circle cx="19" cy="-92" r="26"/><circle cx="0" cy="-110" r="26"/><circle cx="-2" cy="-80" r="22"/></g>' +
+      '<g fill="' + leaf2 + '"><circle cx="-10" cy="-106" r="10"/><circle cx="22" cy="-98" r="9"/><circle cx="-26" cy="-86" r="8"/></g>');
+  },
+  bush: function (x, y, r, c) {
+    return '<g fill="' + c + '"><circle cx="' + (x - r) + '" cy="' + y + '" r="' + r * 0.8 + '"/><circle cx="' + x + '" cy="' + (y - r * 0.35) + '" r="' + r + '"/><circle cx="' + (x + r) + '" cy="' + y + '" r="' + r * 0.75 + '"/></g>';
+  },
+  rock: function (x, y, s, c) {
+    return '<g fill="' + c + '"><ellipse cx="' + x + '" cy="' + y + '" rx="' + 20 * s + '" ry="' + 13 * s + '"/><ellipse cx="' + (x + 22 * s) + '" cy="' + (y + 5 * s) + '" rx="' + 12 * s + '" ry="' + 8 * s + '"/>' +
+      '<ellipse cx="' + (x - 7 * s) + '" cy="' + (y - 6 * s) + '" rx="' + 6 * s + '" ry="' + 3 * s + '" fill="#FFFFFF" opacity="0.25"/></g>';
+  },
+  dots: function (pts, colors, r) {
+    return pts.map(function (p, i) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r || 2.6) + '" fill="' + colors[i % colors.length] + '"/>'; }).join("");
+  },
+  tufts: function (pts, c) {
+    return '<g stroke="' + c + '" stroke-width="2.4" stroke-linecap="round" fill="none">' + pts.map(function (p) {
+      var x = p[0], y = p[1]; return '<path d="M' + (x - 4) + ' ' + y + ' l-4 -12 M' + x + ' ' + y + ' l0 -14 M' + (x + 4) + ' ' + y + ' l4 -11"/>';
+    }).join("") + '</g>';
+  },
+  pond: function (cx, cy, rx, ry, c) {
+    return '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '" fill="' + c + '"/>' +
+      '<ellipse cx="' + (cx - rx * 0.2) + '" cy="' + (cy - ry * 0.28) + '" rx="' + rx * 0.38 + '" ry="' + ry * 0.26 + '" fill="#FFFFFF" opacity="0.35"/>' +
+      '<ellipse cx="' + (cx + rx * 0.38) + '" cy="' + (cy + ry * 0.3) + '" rx="' + rx * 0.18 + '" ry="' + ry * 0.14 + '" fill="#FFFFFF" opacity="0.25"/>';
+  },
+  mount: function (x, by, w, h, c, snow) {
+    var px = x + w / 2, py = by - h;
+    var out = '<path d="M' + x + ' ' + by + ' L' + px + ' ' + py + ' L' + (x + w) + ' ' + by + 'Z" fill="' + c + '"/>' +
+      '<path d="M' + px + ' ' + py + ' L' + (px - w * 0.14) + ' ' + (py + h * 0.5) + ' L' + (px + w * 0.1) + ' ' + (py + h * 0.5) + 'Z" fill="#000000" opacity="0.08"/>';
+    if (snow) out += '<path d="M' + px + ' ' + py + ' l' + w * 0.11 + ' ' + h * 0.22 + ' l' + -w * 0.045 + ' ' + -h * 0.03 + ' l' + -w * 0.04 + ' ' + h * 0.05 + ' l' + -w * 0.045 + ' ' + -h * 0.05 + ' l' + -w * 0.05 + ' ' + h * 0.04 + 'Z" fill="#FFFFFF"/>';
+    return out;
+  },
+  fern: function (x, y, s, c) {
+    return S.at(x, y, s, '<g fill="none" stroke="' + c + '" stroke-width="4" stroke-linecap="round"><path d="M0 0 q-18 -14 -30 -4"/><path d="M0 0 q-10 -24 -20 -28"/><path d="M0 0 q0 -26 2 -34"/><path d="M0 0 q10 -24 22 -26"/><path d="M0 0 q18 -14 30 -2"/></g>');
+  },
+  seaweed: function (x, y, h, c, d) {
+    return '<path class="sway" style="animation-delay:' + (d || 0) + 's" d="M' + x + ' ' + y + ' q-9 ' + -h / 4 + ' 0 ' + -h / 2 + ' t0 ' + -h / 2 + '" fill="none" stroke="' + c + '" stroke-width="5" stroke-linecap="round"/>';
+  },
+  coral: function (x, y, s, c) {
+    return S.at(x, y, s, '<g fill="none" stroke="' + c + '" stroke-width="6" stroke-linecap="round"><path d="M0 0 V-30"/><path d="M0 -10 q-13 -4 -14 -22"/><path d="M0 -16 q13 -4 15 -20"/><path d="M-14 -22 q-8 -2 -9 -12"/><path d="M15 -26 q7 -2 8 -11"/></g>');
+  },
+  birds: function (pts, c, cls) {
+    return '<g class="' + (cls || "birds") + '" fill="none" stroke="' + c + '" stroke-width="2" stroke-linecap="round">' + pts.map(function (p) {
+      var k = p[2] || 1; return '<path d="M' + p[0] + ' ' + p[1] + ' q' + 5 * k + ' ' + -6 * k + ' ' + 10 * k + ' 0 q' + 5 * k + ' ' + -6 * k + ' ' + 10 * k + ' 0"/>';
+    }).join("") + '</g>';
+  },
+  sky: function (id, top, bottom) {
+    return '<defs><linearGradient id="sky-' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + top + '"/><stop offset="1" stop-color="' + bottom + '"/></linearGradient>' +
+      '<radialGradient id="glow-' + id + '"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>' +
+      '<filter id="blur-' + id + '"><feGaussianBlur stdDeviation="5"/></filter></defs>' +
+      '<rect width="500" height="300" fill="url(#sky-' + id + ')"/>';
+  },
+  orb: function (id, cx, cy, r, c) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r * 2 + '" fill="url(#glow-' + id + ')"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + c + '"/>'; },
+  stars: function (pts) { return '<g fill="#FFF8DC">' + pts.map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (p[2] || 1.3) + '"/>'; }).join("") + '</g>'; }
+};
+
+// ---------- Worlds: each has 4 levels, 8 animals and 8 pieces of scenery ----------
+// animal kinds: water (stays by the pond), fly, hop, floor (sea bed)
+var WORLDS = [
+  {
+    id: "savanna", name: "Sunny Savanna", short: "Savanna", icon: "🦁", tint: "#FFEFD6", pond: [64, 84],
+    animals: [
+      { id: "lion", e: "🦁", name: "Leo the Lion", size: 1.1 }, { id: "elephant", e: "🐘", name: "Ellie the Elephant", size: 1.45 },
+      { id: "giraffe", e: "🦒", name: "Gigi the Giraffe", size: 1.6 }, { id: "zebra", e: "🦓", name: "Ziggy the Zebra", size: 1.2 },
+      { id: "rhino", e: "🦏", name: "Rosie the Rhino", size: 1.3 }, { id: "hippo", e: "🦛", name: "Hugo the Hippo", size: 1.3, k: "water" },
+      { id: "monkey", e: "🐒", name: "Milo the Monkey", size: 1, k: "hop" }, { id: "flamingo", e: "🦩", name: "Flo the Flamingo", size: 1.1, k: "water" }
+    ],
+    base: {
+      sky: S.sky("savanna", "#8FD3F4", "#FFE9B8") + S.orb("savanna", 395, 70, 30, "#FFC93C"),
+      far: '<path d="M0 180 Q60 135 130 160 T260 150 T390 140 T500 160 L500 300 L0 300Z" fill="#E9C27A"/>',
+      mid: '<path d="M0 195 Q90 165 190 185 T380 178 T500 188 L500 300 L0 300Z" fill="#D9A85A"/>',
+      ground: '<rect y="198" width="500" height="102" fill="#C99A4E"/><path d="M0 250 Q120 238 250 252 T500 246 L500 300 L0 300Z" fill="#B98840"/>' +
+        '<ellipse cx="372" cy="263" rx="30" ry="6" fill="#6EC3E6" opacity="0.85"/>' +
+        '<rect x="290" y="165" width="3" height="34" rx="1.5" fill="#6B4A2B"/><ellipse cx="291" cy="163" rx="20" ry="6" fill="#5E7A2A"/>',
+      front: S.tufts([[24, 262], [124, 284], [213, 230], [474, 270], [403, 222]], "#8BAE3C")
+    },
+    items: [
+      { label: "🌳 a shady acacia tree", layer: "ground", svg: S.acacia(62, 204, 1, "#5E7A2A", "#6B4A2B") },
+      { label: "🌸 wild flowers", layer: "front", svg: S.dots([[40, 242], [190, 276], [420, 288], [112, 232], [70, 282], [240, 291], [460, 244], [226, 222], [140, 252], [284, 268], [30, 292], [396, 232], [160, 288], [300, 290]], ["#FF6B9A", "#FFD23F", "#B98CFF", "#FFFFFF"]) },
+      { label: "💧 a bigger watering hole", layer: "ground", svg: S.pond(372, 263, 74, 15, "#6EC3E6") },
+      { label: "🌳 another acacia tree", layer: "ground", svg: S.acacia(439, 203, 0.7, "#5E7A2A", "#6B4A2B") },
+      { label: "🌿 bushes and rocks", layer: "ground", svg: S.bush(152, 211, 10, "#6E9A33") + S.bush(258, 217, 8, "#6E9A33") + S.bush(102, 277, 11, "#6E9A33") + S.rock(22, 224, 1, "#A3968A") + S.rock(470, 232, 0.7, "#A3968A") },
+      { label: "🏞️ a winding river", layer: "ground", svg: '<g fill="none" stroke-linecap="round"><path d="M307 199 C296 214 345 222 330 238 S348 256 360 260" stroke="#6EC3E6" stroke-width="10"/><path class="flow" d="M307 199 C296 214 345 222 330 238 S348 256 360 260" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="5 11" opacity="0.7"/></g>' +
+        '<g fill="none" stroke="#8BAE3C" stroke-width="2" stroke-linecap="round"><path d="M300 266 q-2 -12 -5 -22 M304 266 q0 -14 1 -26 M308 266 q2 -10 6 -19 M438 262 q-2 -12 -5 -22 M442 262 q0 -14 1 -26 M446 262 q2 -10 6 -19"/></g><ellipse cx="305" cy="240" rx="1.8" ry="4" fill="#6B4A2B"/><ellipse cx="443" cy="236" rx="1.8" ry="4" fill="#6B4A2B"/>' },
+      { label: "🏔️ a snowy mountain", layer: "sky", svg: S.mount(110, 195, 250, 137, "#B7A6CF", true) },
+      { label: "🌈 a rainbow and a flock of birds", layer: "sky", fade: true, svg: '<g fill="none" stroke-width="7" opacity="0.6"><path d="M80 200 A170 150 0 0 1 420 200" stroke="#FF6B6B"/><path d="M87 200 A163 143 0 0 1 413 200" stroke="#FF9F43"/><path d="M94 200 A156 136 0 0 1 406 200" stroke="#FFC93C"/><path d="M101 200 A149 129 0 0 1 399 200" stroke="#4FAE3D"/><path d="M108 200 A142 122 0 0 1 392 200" stroke="#1FAFA8"/><path d="M115 200 A135 115 0 0 1 385 200" stroke="#8E6CEF"/></g>' + S.birds([[60, 60], [82, 48, 0.8], [84, 72, 0.8], [104, 58, 0.6]], "#3A2E5C") }
+    ]
+  },
+  {
+    id: "jungle", name: "Jumbled Jungle", short: "Jungle", icon: "🐅", tint: "#E3F4D7", pond: [18, 40],
+    animals: [
+      { id: "tiger", e: "🐅", name: "Tia the Tiger", size: 1.2 }, { id: "gorilla", e: "🦍", name: "Gus the Gorilla", size: 1.25 },
+      { id: "parrot", e: "🦜", name: "Polly the Parrot", size: 0.95, k: "fly" }, { id: "sloth", e: "🦥", name: "Sid the Sloth", size: 1 },
+      { id: "leopard", e: "🐆", name: "Lulu the Leopard", size: 1.15 }, { id: "croc", e: "🐊", name: "Coco the Crocodile", size: 1.2, k: "water" },
+      { id: "orangutan", e: "🦧", name: "Ollie the Orangutan", size: 1.15, k: "hop" }, { id: "snake", e: "🐍", name: "Sasha the Snake", size: 0.95 }
+    ],
+    base: {
+      sky: S.sky("jungle", "#7FD6C2", "#E8F8C8") + S.orb("jungle", 110, 60, 24, "#FFF1A8"),
+      far: '<path d="M0 150 Q25 118 50 142 T100 136 T150 128 T200 140 T250 124 T300 138 T350 126 T400 140 T450 128 T500 140 L500 300 L0 300Z" fill="#4FA56B"/>',
+      mid: '<path d="M0 182 Q30 156 60 176 T120 170 T180 178 T240 166 T300 178 T360 168 T420 178 T500 170 L500 300 L0 300Z" fill="#2F7D4F"/>',
+      ground: '<rect y="200" width="500" height="100" fill="#6DB65B"/><path d="M0 252 Q120 240 250 254 T500 248 L500 300 L0 300Z" fill="#5AA44C"/><ellipse cx="150" cy="262" rx="28" ry="6" fill="#4FB3BF" opacity="0.9"/>',
+      front: S.tufts([[30, 268], [230, 232], [330, 284], [470, 262], [400, 226]], "#2F7D4F")
+    },
+    items: [
+      { label: "🌳 a tall jungle tree", layer: "ground", svg: S.jtree(60, 218, 1.05, "#2E8B4E", "#57B86B", "#6B4A2B") },
+      { label: "🌿 giant ferns", layer: "front", svg: S.fern(250, 236, 0.8, "#2F8F4A") + S.fern(385, 288, 1, "#2F8F4A") + S.fern(20, 296, 0.9, "#2F8F4A") },
+      { label: "💧 a jungle pool", layer: "ground", svg: S.pond(150, 262, 70, 14, "#4FB3BF") + '<g fill="#3C9A45"><ellipse cx="128" cy="266" rx="7" ry="2.2"/><ellipse cx="176" cy="257" rx="6" ry="2"/></g><circle cx="129" cy="264.5" r="2" fill="#FF8FB1"/>' },
+      { label: "🌳 another giant tree", layer: "ground", svg: S.jtree(445, 214, 0.9, "#2E8B4E", "#57B86B", "#6B4A2B") },
+      { label: "🌺 jungle flowers and butterflies", layer: "front", svg: S.dots([[90, 240], [300, 250], [340, 228], [460, 290], [200, 290], [270, 282], [420, 246], [60, 286]], ["#FF5C8A", "#FFB03B", "#FFFFFF", "#C77DFF"], 3) + '<g font-size="11"><text class="bfly b1" x="290" y="228">🦋</text><text class="bfly b2" x="80" y="232">🦋</text></g>' },
+      { label: "🌱 hanging vines", layer: "front", svg: '<g fill="none" stroke="#2A7A45" stroke-width="3" stroke-linecap="round"><path d="M150 0 Q138 40 152 78"/><path d="M215 0 Q226 30 214 56"/><path d="M330 0 Q318 46 334 92"/><path d="M392 0 Q400 26 390 48"/></g><g fill="#3FA35A"><circle cx="146" cy="40" r="4"/><circle cx="152" cy="78" r="5"/><circle cx="220" cy="30" r="4"/><circle cx="214" cy="56" r="5"/><circle cx="324" cy="46" r="4"/><circle cx="334" cy="92" r="5"/><circle cx="390" cy="48" r="5"/></g>' },
+      { label: "💦 a waterfall", layer: "mid", svg: '<path d="M318 132 L360 132 L366 204 L312 204Z" fill="#7C8A80"/><path d="M330 134 Q333 170 332 202 L348 202 Q346 170 348 134Z" fill="#8FDCE8"/><g class="falls" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" opacity="0.8"><path d="M335 136 V200"/><path d="M343 136 V200"/></g><ellipse cx="340" cy="203" rx="15" ry="4" fill="#FFFFFF" opacity="0.75"/>' },
+      { label: "🛕 a lost temple", layer: "mid", svg: '<g fill="#A9A48C"><rect x="196" y="176" width="88" height="28"/><rect x="208" y="154" width="64" height="24"/><rect x="220" y="134" width="40" height="22"/><rect x="230" y="120" width="20" height="16"/></g><g fill="#8C876F"><rect x="196" y="176" width="88" height="3"/><rect x="208" y="154" width="64" height="3"/><rect x="220" y="134" width="40" height="3"/></g><path d="M233 204 V186 Q240 178 247 186 V204Z" fill="#4A4636"/><circle cx="212" cy="170" r="5" fill="#3FA35A"/><circle cx="268" cy="150" r="4" fill="#3FA35A"/>' }
+    ]
+  },
+  {
+    id: "ocean", name: "Deep Blue Ocean", short: "Ocean", icon: "🐬", tint: "#D9F0FA", swim: true,
+    animals: [
+      { id: "dolphin", e: "🐬", name: "Dot the Dolphin", size: 1.25 }, { id: "whale", e: "🐳", name: "Wally the Whale", size: 1.6 },
+      { id: "shark", e: "🦈", name: "Finn the Shark", size: 1.35 }, { id: "octopus", e: "🐙", name: "Inky the Octopus", size: 1.1 },
+      { id: "turtle", e: "🐢", name: "Shelly the Turtle", size: 1.05 }, { id: "fish", e: "🐠", name: "Coral the Clownfish", size: 0.85 },
+      { id: "crab", e: "🦀", name: "Clawdia the Crab", size: 0.9, k: "floor" }, { id: "seal", e: "🦭", name: "Sammy the Seal", size: 1.15 }
+    ],
+    base: {
+      sky: S.sky("ocean", "#7FE0F0", "#1B6FA8"),
+      far: '<path d="M0 215 Q40 180 80 205 T170 195 T260 215 T350 190 T430 208 T500 196 L500 300 L0 300Z" fill="#1F6E9F" opacity="0.7"/>',
+      mid: '<path d="M0 235 Q60 212 120 232 T250 226 T380 236 T500 224 L500 300 L0 300Z" fill="#185B88"/>',
+      ground: '<path d="M0 248 Q125 234 250 246 T500 242 L500 300 L0 300Z" fill="#F1D9A0"/><path d="M0 274 Q125 264 250 276 T500 270 L500 300 L0 300Z" fill="#E3C684"/>',
+      front: ''
+    },
+    items: [
+      { label: "🌿 swaying seaweed", layer: "ground", svg: S.seaweed(40, 262, 60, "#2FA36B", 0) + S.seaweed(54, 266, 44, "#3DBD7D", -1) + S.seaweed(460, 258, 54, "#2FA36B", -2) },
+      { label: "🪸 pink coral", layer: "ground", svg: S.coral(120, 262, 1, "#FF7FA8") + S.coral(390, 268, 0.8, "#FF7FA8") },
+      { label: "🫧 streams of bubbles", layer: "front", fade: true, svg: '<g fill="none" stroke="#FFFFFF" stroke-width="1.4" opacity="0.8">' + [[60, 0, 3], [70, -2, 2], [300, -1, 3.5], [308, -3.5, 2], [440, -2.5, 3], [200, -4, 2.5]].map(function (b) { return '<circle class="bub" style="animation-delay:' + b[1] + 's" cx="' + b[0] + '" cy="250" r="' + b[2] + '"/>'; }).join("") + '</g>' },
+      { label: "⭐ rocks and starfish", layer: "ground", svg: S.rock(250, 262, 1, "#6F7F96") + S.rock(20, 284, 0.7, "#6F7F96") + '<path d="M300 276 l3 7 7 1 -5 5 1 7 -6 -4 -6 4 1 -7 -5 -5 7 -1Z" fill="#FF9F43"/><path d="M90 286 l2.4 5.6 5.6 .8 -4 4 .8 5.6 -4.8 -3.2 -4.8 3.2 .8 -5.6 -4 -4 5.6 -.8Z" fill="#FF6B6B"/>' },
+      { label: "🪸 a coral garden", layer: "ground", svg: S.coral(190, 270, 0.9, "#FFA94D") + S.coral(430, 262, 1.1, "#B98CFF") + S.coral(340, 258, 0.6, "#FFA94D") + S.seaweed(310, 262, 46, "#3DBD7D", -1.5) + S.seaweed(214, 268, 34, "#2FA36B", -0.5) },
+      { label: "💰 a treasure chest", layer: "ground", svg: '<g transform="translate(150 272) rotate(-6)"><rect x="-18" y="-14" width="36" height="16" rx="2" fill="#8A5A2B"/><path d="M-18 -14 Q0 -30 18 -14Z" fill="#A46B33"/><rect x="-18" y="-15" width="36" height="3" fill="#FFC93C"/><rect x="-3" y="-13" width="6" height="7" rx="1" fill="#FFC93C"/><circle cx="-8" cy="-19" r="2.4" fill="#FFE27A"/><circle cx="6" cy="-20" r="2.4" fill="#FFE27A"/><circle cx="0" cy="-22" r="2.4" fill="#FFE27A"/></g>' },
+      { label: "🚢 a sunken ship", layer: "far", svg: '<g transform="translate(350 222) rotate(-10)" fill="#154B74"><path d="M-70 0 Q-60 26 -30 28 L50 28 Q72 20 80 -6 L50 0Z"/><rect x="-6" y="-58" width="5" height="60"/><path d="M-1 -56 L34 -34 L-1 -22Z" opacity="0.8"/><rect x="30" y="-30" width="4" height="30"/></g>' },
+      { label: "🐟 sunbeams and a school of fish", layer: "sky", fade: true, svg: '<g fill="#FFFFFF" opacity="0.13"><path d="M90 0 L140 0 L60 300 L-20 300Z"/><path d="M230 0 L270 0 L250 300 L180 300Z"/><path d="M380 0 L440 0 L470 300 L380 300Z"/></g><g class="birds" fill="#FFD23F">' + [[40, 90], [58, 82], [60, 100], [78, 90], [80, 108], [98, 98]].map(function (f) { return '<path d="M' + f[0] + ' ' + f[1] + ' q6 -5 12 0 q-6 5 -12 0Z M' + f[0] + ' ' + f[1] + ' l-4 -3 v6Z"/>'; }).join("") + '</g>' }
+    ]
+  },
+  {
+    id: "arctic", name: "Frozen North", short: "Arctic", icon: "🐧", tint: "#E4EEFA", pond: [56, 76],
+    animals: [
+      { id: "penguin", e: "🐧", name: "Pip the Penguin", size: 1, k: "hop" }, { id: "polarbear", e: "🐻‍❄️", name: "Snowy the Polar Bear", size: 1.35 },
+      { id: "reindeer", e: "🦌", name: "Rudy the Reindeer", size: 1.3 }, { id: "wolf", e: "🐺", name: "Willow the Wolf", size: 1.1 },
+      { id: "fox", e: "🦊", name: "Frost the Arctic Fox", size: 1 }, { id: "owl", e: "🦉", name: "Luna the Snowy Owl", size: 0.95, k: "fly" },
+      { id: "hare", e: "🐇", name: "Hazel the Hare", size: 0.9, k: "hop" }, { id: "mammoth", e: "🦣", name: "Monty the Mammoth", size: 1.55 }
+    ],
+    base: {
+      sky: S.sky("arctic", "#1B2A5C", "#6FB8C8") + S.stars([[40, 30, 1.6], [95, 62], [150, 22, 1.8], [210, 55], [260, 18, 1.5], [310, 70], [455, 28, 1.7], [480, 85], [20, 90], [235, 95, 1], [125, 105]]) + S.orb("arctic", 400, 62, 22, "#F4F1DC"),
+      far: S.mount(-40, 200, 200, 110, "#9CC3E0", true) + S.mount(120, 200, 170, 80, "#B4D4EA", true) + S.mount(330, 200, 220, 96, "#9CC3E0", true),
+      mid: '<path d="M0 190 Q90 168 190 184 T380 176 T500 186 L500 300 L0 300Z" fill="#DCEEFA"/>',
+      ground: '<rect y="198" width="500" height="102" fill="#F4FAFF"/><path d="M0 250 Q120 238 250 252 T500 246 L500 300 L0 300Z" fill="#E3F0FA"/><ellipse cx="330" cy="262" rx="30" ry="6" fill="#7FC4E8"/>',
+      front: ''
+    },
+    items: [
+      { label: "🌲 a snowy pine tree", layer: "ground", svg: S.pine(64, 216, 1.25, "#2F6B5A", "#5A4030") },
+      { label: "🧊 a frozen pond", layer: "ground", svg: S.pond(330, 262, 72, 14, "#8FD0EE") },
+      { label: "🛖 an igloo", layer: "ground", svg: '<g transform="translate(190 224)"><path d="M-32 0 A32 30 0 0 1 32 0Z" fill="#EEF7FF" stroke="#B5D3EA" stroke-width="1.5"/><path d="M-30 -10 H30 M-24 -19 H24 M-12 -27 H12 M-10 0 V-10 M10 0 V-10 M0 -10 V-19 M-16 -10 V-19 M16 -10 V-19" stroke="#B5D3EA" stroke-width="1.2" fill="none"/><path d="M-8 0 V-9 A8 8 0 0 1 8 -9 V0Z" fill="#33466B"/></g>' },
+      { label: "🌲 a pine forest", layer: "ground", svg: S.pine(430, 212, 0.9, "#2F6B5A", "#5A4030") + S.pine(462, 218, 1.1, "#2F6B5A", "#5A4030") + S.pine(112, 208, 0.7, "#2F6B5A", "#5A4030") },
+      { label: "🧊 icebergs", layer: "ground", svg: '<path d="M4 232 L22 204 L34 220 L46 208 L60 232Z" fill="#BFE3F5"/><path d="M22 204 L28 232 L4 232Z" fill="#FFFFFF" opacity="0.5"/><path d="M400 290 L416 268 L428 280 L440 272 L452 290Z" fill="#BFE3F5"/><path d="M416 268 L420 290 L400 290Z" fill="#FFFFFF" opacity="0.5"/>' },
+      { label: "⛄ a snowman", layer: "ground", svg: '<g transform="translate(256 240)"><circle cx="0" cy="0" r="13" fill="#FFFFFF" stroke="#C9DDEE"/><circle cx="0" cy="-18" r="9" fill="#FFFFFF" stroke="#C9DDEE"/><rect x="-8" y="-30" width="16" height="3" fill="#33466B"/><rect x="-5" y="-38" width="10" height="9" fill="#33466B"/><circle cx="-3" cy="-20" r="1.2" fill="#33466B"/><circle cx="3" cy="-20" r="1.2" fill="#33466B"/><path d="M0 -17 l8 2 -8 1Z" fill="#FF8A3D"/><path d="M-8 -11 Q0 -7 8 -11" stroke="#FF6B6B" stroke-width="3" fill="none"/><circle cx="0" cy="-3" r="1.3" fill="#33466B"/><circle cx="0" cy="3" r="1.3" fill="#33466B"/></g>' },
+      { label: "❄️ falling snow", layer: "front", fade: true, svg: '<g fill="#FFFFFF">' + [[30, 0, 2], [80, -3, 1.6], [130, -6, 2.2], [185, -1.5, 1.6], [240, -4.5, 2], [290, -7, 1.6], [345, -2.5, 2.2], [395, -5.5, 1.6], [445, -0.8, 2], [480, -3.8, 1.6], [105, -8, 1.4], [320, -9, 1.4]].map(function (f) { return '<circle class="snowf" style="animation-delay:' + f[1] + 's" cx="' + f[0] + '" cy="-6" r="' + f[2] + '"/>'; }).join("") + '</g>' },
+      { label: "🌌 the northern lights", layer: "sky", fade: true, svg: '<g class="aurora" fill="none" stroke-linecap="round" filter="url(#blur-arctic)"><path d="M-10 80 Q80 20 170 70 T340 50 T510 80" stroke="#5CFFB0" stroke-width="20" opacity="0.6"/><path d="M-10 108 Q100 60 200 100 T380 84 T510 112" stroke="#4FD8FF" stroke-width="15" opacity="0.5"/><path d="M-10 54 Q90 6 190 44 T360 26 T510 50" stroke="#B98CFF" stroke-width="13" opacity="0.5"/></g>' }
+    ]
+  },
+  {
+    id: "lost", name: "The Lost World", short: "Lost World", icon: "🦖", tint: "#F4E3D7", pond: [14, 34],
+    animals: [
+      { id: "bronto", e: "🦕", name: "Bronty the Brontosaurus", size: 1.7 }, { id: "trex", e: "🦖", name: "Rex the T-Rex", size: 1.6 },
+      { id: "dragon", e: "🐉", name: "Ember the Dragon", size: 1.5, k: "fly" }, { id: "unicorn", e: "🦄", name: "Stardust the Unicorn", size: 1.2 },
+      { id: "dodo", e: "🦤", name: "Dodie the Dodo", size: 1, k: "hop" }, { id: "peacock", e: "🦚", name: "Percy the Peacock", size: 1.15 },
+      { id: "eagle", e: "🦅", name: "Skye the Eagle", size: 1.1, k: "fly" }, { id: "lizard", e: "🦎", name: "Kiki the Lizard", size: 0.9, k: "water" }
+    ],
+    base: {
+      sky: S.sky("lost", "#3B2A6B", "#FF9E6B") + S.stars([[40, 24, 1.5], [120, 40], [200, 18, 1.4], [270, 46], [470, 30, 1.6], [20, 70]]) + S.orb("lost", 110, 150, 34, "#FFD27A"),
+      far: '<path d="M0 176 Q50 140 110 164 T230 150 T350 162 T500 146 L500 300 L0 300Z" fill="#6B4470"/>',
+      mid: '<path d="M0 194 Q90 168 190 186 T380 178 T500 188 L500 300 L0 300Z" fill="#4E7340"/>',
+      ground: '<rect y="198" width="500" height="102" fill="#6F8F45"/><path d="M0 250 Q120 238 250 252 T500 246 L500 300 L0 300Z" fill="#5E7E3A"/><ellipse cx="120" cy="262" rx="28" ry="6" fill="#5FB0A8"/>',
+      front: S.tufts([[220, 232], [330, 282], [474, 268], [300, 226]], "#3F5E2A")
+    },
+    items: [
+      { label: "🌴 giant palms and ferns", layer: "ground", svg: S.palm(48, 220, 1.7, "#3F7F3A", "#5A4030") + S.palm(460, 214, 1.4, "#3F7F3A", "#5A4030") + S.fern(390, 232, 0.7, "#3F7F3A") },
+      { label: "🥚 a nest of dinosaur eggs", layer: "ground", svg: '<g transform="translate(262 244)"><ellipse cx="0" cy="4" rx="26" ry="8" fill="#7A5A32"/><ellipse cx="-10" cy="-4" rx="7" ry="9" fill="#FFF3D6"/><ellipse cx="4" cy="-6" rx="7" ry="9" fill="#FFF3D6"/><ellipse cx="15" cy="-2" rx="6" ry="8" fill="#FFF3D6"/><g fill="#B98CFF"><circle cx="-11" cy="-6" r="1.5"/><circle cx="5" cy="-9" r="1.5"/><circle cx="2" cy="-3" r="1.5"/><circle cx="15" cy="-4" r="1.5"/></g><path d="M-24 4 Q0 12 24 4" stroke="#5A4020" stroke-width="2" fill="none"/></g>' },
+      { label: "💧 a steamy swamp", layer: "ground", svg: S.pond(120, 262, 68, 13, "#5FB0A8") + '<g fill="#FFFFFF" opacity="0.5"><circle class="bub" style="animation-duration:5s" cx="104" cy="258" r="4"/><circle class="bub" style="animation-duration:6s;animation-delay:-2s" cx="138" cy="260" r="3"/></g>' },
+      { label: "🌋 a volcano", layer: "sky", svg: S.mount(290, 200, 220, 140, "#4A3350", false) + '<ellipse cx="400" cy="64" rx="15" ry="5" fill="#2E1F35"/><path d="M394 64 Q390 90 384 112 M404 64 Q410 86 414 100" stroke="#FF7A3D" stroke-width="3" stroke-linecap="round" fill="none"/>' },
+      { label: "💎 glowing crystals", layer: "ground", svg: '<g class="glint"><path d="M392 262 L398 238 L405 262Z" fill="#6FE7FF"/><path d="M402 264 L412 230 L420 264Z" fill="#B98CFF"/><path d="M416 264 L424 246 L430 264Z" fill="#FF8FD0"/><path d="M398 238 L400 262 L392 262Z M412 230 L413 264 L402 264Z" fill="#FFFFFF" opacity="0.4"/></g>' },
+      { label: "🦴 a giant skeleton", layer: "ground", svg: '<g transform="translate(196 222)" fill="none" stroke="#F4EEDD" stroke-width="3.5" stroke-linecap="round"><path d="M-30 -2 H34"/><path d="M-22 -2 Q-22 -26 -14 -2"/><path d="M-8 -2 Q-8 -32 2 -2"/><path d="M8 -2 Q8 -28 18 -2"/><path d="M24 -2 Q24 -20 32 -2"/><circle cx="-36" cy="-4" r="6" fill="#F4EEDD" stroke="none"/></g>' },
+      { label: "🦅 soaring pterosaurs", layer: "sky", fade: true, svg: S.birds([[50, 70, 1.6], [84, 54, 1.2], [90, 84, 1.2]], "#2E1F35") },
+      { label: "🎆 a volcano eruption", layer: "sky", fade: true, svg: '<circle class="pulse" cx="400" cy="60" r="34" fill="#FF7A3D" opacity="0.45" filter="url(#blur-lost)"/>' + [[-30, -50, 0], [-12, -66, -0.4], [8, -70, -0.9], [26, -54, -1.3], [-22, -38, -1.7], [18, -40, -0.2], [0, -56, -1.1]].map(function (s, i) { return '<circle class="spark" style="--dx:' + s[0] + 'px;--dy:' + s[1] + 'px;animation-delay:' + s[2] + 's" cx="400" cy="62" r="' + (2.2 + (i % 3) * 0.6) + '" fill="' + (i % 2 ? "#FFD23F" : "#FF5A36") + '"/>'; }).join("") }
+    ]
+  }
+];
+WORLDS.forEach(function (w, i) { w.index = i; w.from = i * 4 + 1; });
+
+function buildSceneSVG(w) {
+  var out = '<svg class="land" viewBox="0 0 500 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">';
+  ["sky", "far", "mid", "ground", "front"].forEach(function (layer) {
+    out += w.base[layer] || "";
+    w.items.forEach(function (it, i) {
+      if (it.layer === layer) out += '<g class="scenery' + (it.fade ? " fade" : "") + '" data-n="' + (i + 1) + '">' + it.svg + '</g>';
+    });
+  });
+  return out + '</svg>';
+}
+(function () {
+  "use strict";
+
+  var KEY = "spellingWorld_v1";
+  var ROUND = 8, STARS_NEEDED = 5, MAX_LEVEL = LEVELS.length;
+  var AVATARS = ["🦊", "🐼", "🐯", "🐸", "🦄", "🐙", "🐧", "🦖", "🐨", "🐵", "🦉", "🐝"];
+  var STAGES = [
+    { level: 1, ic: "🐣", t: "Just starting", s: "Picture words like cat and fish (about age 5 to 6)" },
+    { level: 5, ic: "🚲", t: "Getting going", s: "Words like friend and because (about age 7 to 8)" },
+    { level: 9, ic: "🚀", t: "Confident", s: "Words like believe and library (about age 9 to 10)" },
+    { level: 13, ic: "🏆", t: "Champion", s: "Words like necessary and rhythm (about age 11 to 12)" },
+    { level: 17, ic: "🧙", t: "Legend", s: "Words like silhouette. Teens and grown-ups welcome" }
+  ];
+  var CONFETTI = ["#FF6B6B", "#FFC93C", "#1FAFA8", "#4FAE3D", "#B98CFF"];
+
+  function $(id) { return document.getElementById(id); }
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- storage ----------
+  function load() {
+    try { var d = JSON.parse(localStorage.getItem(KEY) || "null"); if (d && Array.isArray(d.profiles) && d.settings) return d; } catch (e) {}
+    var us = false; try { us = /^en-US/i.test(navigator.language || ""); } catch (e) {}
+    return { profiles: [], current: null, settings: { sound: true, voice: true, us: us } };
+  }
+  var db = load();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
+  function P() { for (var i = 0; i < db.profiles.length; i++) if (db.profiles[i].id === db.current) return db.profiles[i]; return null; }
+  function dayKey(d) { d = d || new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  function worldIndex(level) { return Math.min(WORLDS.length - 1, Math.floor((level - 1) / 4)); }
+  function owned(p, w) { return (p.animals[w.id] || []).filter(function (id) { return w.animals.some(function (a) { return a.id === id; }); }); }
+  function spell(it) { return db.settings.us && it.us ? it.us : it.w; }
+
+  // ---------- sound ----------
+  var actx = null;
+  function audio() {
+    if (!db.settings.sound) return null;
+    try {
+      if (!actx) { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; actx = new AC(); }
+      if (actx.state === "suspended") actx.resume();
+      return actx;
+    } catch (e) { return null; }
+  }
+  function tone(freq, start, dur, type, vol) {
+    var c = audio(); if (!c) return;
+    try {
+      var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + (start || 0);
+      o.type = type || "sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol || 0.18, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+    } catch (e) {}
+  }
+  var sfx = {
+    good: function (combo) { var b = 600 + Math.min(combo || 0, 6) * 40; tone(b, 0, 0.18, "triangle"); tone(b * 1.5, 0.1, 0.28, "triangle"); },
+    bad: function () { tone(220, 0, 0.22, "sine", 0.12); tone(185, 0.12, 0.25, "sine", 0.1); },
+    pop: function () { tone(520 + Math.random() * 300, 0, 0.12, "triangle", 0.14); },
+    key: function () { tone(820, 0, 0.05, "sine", 0.05); },
+    del: function () { tone(420, 0, 0.05, "sine", 0.05); },
+    fanfare: function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.12, 0.35, "triangle", 0.16); }); tone(1319, 0.5, 0.6, "triangle", 0.12); },
+    levelup: function () { [392, 523, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, i * 0.09, 0.4, "square", 0.06); tone(f, i * 0.09, 0.4, "triangle", 0.12); }); },
+    shake: function () { tone(300, 0, 0.08, "square", 0.04); }
+  };
+
+  var voices = [];
+  function loadVoices() { try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
+  if ("speechSynthesis" in window) { loadVoices(); try { window.speechSynthesis.addEventListener("voiceschanged", loadVoices); } catch (e) {} }
+  function bestVoice() {
+    var prefs = db.settings.us ? ["en-US"] : ["en-NZ", "en-AU", "en-GB"];
+    for (var i = 0; i < prefs.length; i++) for (var j = 0; j < voices.length; j++) if ((voices[j].lang || "").replace("_", "-") === prefs[i]) return voices[j];
+    return null;
+  }
+  function hush() { try { window.speechSynthesis.cancel(); } catch (e) {} }
+  function say(texts, rate) {
+    if (!db.settings.voice || !("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var v = bestVoice();
+      [].concat(texts).forEach(function (t) {
+        var u = new SpeechSynthesisUtterance(t);
+        u.rate = rate || 0.85; u.pitch = 1.05; u.lang = v ? v.lang : (db.settings.us ? "en-US" : "en-GB");
+        if (v) u.voice = v;
+        window.speechSynthesis.speak(u);
+      });
+    } catch (e) {}
+  }
+
+  // ---------- screens ----------
+  var SCREENS = ["profiles", "home", "game", "results"];
+  function show(name) {
+    SCREENS.forEach(function (id) { $(id).classList.toggle("active", id === name); });
+    if (name !== "home") stopScene();
+    if (name !== "game") hush();
+    window.scrollTo(0, 0);
+  }
+  function setTint(w) { document.body.style.background = w ? w.tint : ""; }
+
+  // ---------- profiles ----------
+  var draft = { avatar: AVATARS[0], level: 1 };
+  function renderProfiles(forceNew) {
+    show("profiles"); setTint(null);
+    $("playerChip").hidden = true;
+    var showNew = forceNew || db.profiles.length === 0;
+    $("pickView").hidden = showNew; $("newView").hidden = !showNew;
+    $("cancelNew").hidden = db.profiles.length === 0;
+    if (showNew) {
+      draft = { avatar: pick(AVATARS), level: 1 };
+      $("nameInput").value = "";
+      renderDraft();
+      return;
+    }
+    var list = $("playerList"); list.innerHTML = "";
+    db.profiles.forEach(function (p) {
+      var b = el("button", "player"); b.type = "button";
+      b.appendChild(el("span", "av", p.avatar)); b.appendChild(el("span", null, p.name)); b.appendChild(el("small", null, "Level " + p.level));
+      b.addEventListener("click", function () { db.current = p.id; save(); audio(); viewW = null; renderHome(); });
+      list.appendChild(b);
+    });
+    if (db.profiles.length < 8) {
+      var add = el("button", "player add"); add.type = "button";
+      add.appendChild(el("span", "av", "➕")); add.appendChild(el("span", null, "New player"));
+      add.addEventListener("click", function () { renderProfiles(true); });
+      list.appendChild(add);
+    }
+  }
+  function renderDraft() {
+    var g = $("avatarGrid"); g.innerHTML = "";
+    AVATARS.forEach(function (a) {
+      var b = el("button", a === draft.avatar ? "sel" : "", a); b.type = "button"; b.setAttribute("aria-label", "Explorer " + a);
+      b.addEventListener("click", function () { draft.avatar = a; sfx.pop(); renderDraft(); });
+      g.appendChild(b);
+    });
+    var s = $("stageList"); s.innerHTML = "";
+    STAGES.forEach(function (st) {
+      var b = el("button", st.level === draft.level ? "sel" : ""); b.type = "button";
+      b.appendChild(el("span", "ic", st.ic));
+      var d = el("span"); d.appendChild(document.createTextNode(st.t + " (Level " + st.level + ")")); d.appendChild(el("small", null, st.s));
+      b.appendChild(d);
+      b.addEventListener("click", function () { draft.level = st.level; sfx.pop(); renderDraft(); });
+      s.appendChild(b);
+    });
+  }
+  function createProfile() {
+    var name = $("nameInput").value.trim().replace(/\s+/g, " ").slice(0, 12);
+    if (!name) { $("nameInput").focus(); $("nameInput").placeholder = "Type your name first"; return; }
+    var p = { id: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), name: name, avatar: draft.avatar, level: draft.level, stars: 0, animals: {}, pending: null, seen: {}, missed: {}, streak: { day: null, count: 0 }, words: 0 };
+    db.profiles.push(p); db.current = p.id; save(); audio(); sfx.fanfare(); viewW = null;
+    renderHome();
+  }
+
+  // ---------- home ----------
+  var viewW = null;   // world index being looked at
+  function renderHome() {
+    var p = P(); if (!p) { renderProfiles(); return; }
+    show("home");
+    var cur = worldIndex(p.level);
+    if (p.pending) viewW = worldById(p.pending.w).index;
+    if (viewW == null || viewW > WORLDS.length - 1) viewW = cur;
+    var w = WORLDS[viewW];
+    setTint(w);
+
+    $("playerChip").hidden = false; $("chipAv").textContent = p.avatar; $("chipName").textContent = p.name;
+    $("lvlNum").textContent = p.level;
+    $("lvlWorld").textContent = WORLDS[cur].icon + " " + WORLDS[cur].name + (p.level > MAX_LEVEL ? " · Legend" : "");
+    renderStarbar($("lvlStars"), p.stars);
+    var left = STARS_NEEDED - p.stars;
+    $("lvlSub").textContent = left + (left === 1 ? " more star" : " more stars") + " to reach Level " + (p.level + 1);
+    var st = $("streak");
+    var live = p.streak && (p.streak.day === dayKey() || p.streak.day === dayKey(new Date(Date.now() - 864e5)));
+    st.hidden = !(live && p.streak.count > 1);
+    if (!st.hidden) st.textContent = "🔥 " + p.streak.count + " days";
+    $("playBtn").textContent = "▶ Play Level " + p.level;
+
+    // world tabs
+    var tabs = $("tabs"); tabs.innerHTML = "";
+    WORLDS.forEach(function (wd, i) {
+      var open = p.level >= wd.from;
+      var b = el("button", "tab" + (i === viewW ? " sel" : "") + (open ? "" : " locked")); b.type = "button";
+      b.setAttribute("aria-label", wd.name + (open ? "" : ", unlocks at level " + wd.from));
+      b.appendChild(el("span", "ic", open ? wd.icon : "🔒"));
+      b.appendChild(el("span", null, wd.short));
+      b.appendChild(el("span", "cnt", open ? owned(p, wd).length + "/" + wd.animals.length : "Lv " + wd.from));
+      b.addEventListener("click", function () { if (viewW === i) return; viewW = i; sfx.pop(); renderHome(); });
+      tabs.appendChild(b);
+    });
+    var selTab = tabs.querySelector(".sel"); if (selTab && selTab.scrollIntoView) { try { selTab.scrollIntoView({ block: "nearest", inline: "center" }); } catch (e) {} }
+
+    renderWorld(p, w);
+  }
+  function renderStarbar(box, n, popLast) {
+    box.innerHTML = "";
+    for (var i = 0; i < STARS_NEEDED; i++) { var s = el("span", i < n ? "on" : "", "⭐"); if (popLast && i >= n - popLast && i < n) { s.classList.add("pop"); s.style.animationDelay = (0.2 * (i - (n - popLast))) + "s"; } box.appendChild(s); }
+  }
+  function worldById(id) { for (var i = 0; i < WORLDS.length; i++) if (WORLDS[i].id === id) return WORLDS[i]; return WORLDS[0]; }
+
+  function renderWorld(p, w) {
+    var open = p.level >= w.from;
+    var have = owned(p, w), n = have.length, total = w.animals.length;
+    $("sceneTitle").textContent = w.icon + " " + w.name;
+    $("sceneCount").textContent = open ? n + " of " + total + " animals" : "Locked";
+    var nu = $("nextUp"); nu.innerHTML = "";
+    if (!open) nu.textContent = "Reach Level " + w.from + " to explore " + w.name + ".";
+    else if (n >= total) nu.textContent = "🏆 " + w.name + " is complete! Every animal is here.";
+    else if (n === 0) nu.textContent = "Spell 5 words right in a round to win your first animal here.";
+    else { nu.appendChild(document.createTextNode("Next animal brings ")); nu.appendChild(el("b", null, w.items[n].label)); }
+
+    var col = $("collection"); col.innerHTML = "";
+    w.animals.forEach(function (a) {
+      var has = have.indexOf(a.id) !== -1;
+      var s = el("div", "slot" + (has ? "" : " locked")); s.title = has ? a.name : "Still to find";
+      s.setAttribute("aria-label", has ? a.name : "Mystery animal"); s.appendChild(el("span", null, a.e));
+      col.appendChild(s);
+    });
+
+    var cur = worldIndex(p.level);
+    var pr = $("practiceRow");
+    pr.hidden = !(open && w.index !== cur);
+    if (!pr.hidden) $("practiceBtn").textContent = n >= total ? "Practise " + w.name + " words" : "Practise here to find more animals";
+
+    renderScene(p, w, open);
+  }
+
+  // ---------- scene ----------
+  var critters = [];
+  function stopScene() { critters.forEach(function (c) { clearTimeout(c.timer); clearTimeout(c.talkT); }); critters = []; $("critters").innerHTML = ""; }
+
+  function renderScene(p, w, open) {
+    stopScene();
+    var scene = $("scene");
+    $("sceneSvg").innerHTML = buildSceneSVG(w);
+    scene.classList.toggle("locked", !open);
+    var old = scene.querySelectorAll(".lock-over, .empty, .sparkle"); for (var i = 0; i < old.length; i++) old[i].remove();
+    if (!open) {
+      var lo = el("div", "lock-over"); lo.appendChild(el("span", "ic", "🔒")); lo.appendChild(el("span", null, w.name)); lo.appendChild(el("small", null, "Unlocks at Level " + w.from));
+      scene.appendChild(lo); setScenery(0, false); return;
+    }
+    var have = owned(p, w);
+    var pend = p.pending && p.pending.w === w.id ? p.pending.a : null;
+    setScenery(have.length, !!pend);
+    have.forEach(function (id, i) {
+      if (id === pend) return;
+      var a = animalOf(w, id); if (!a) return;
+      var c = makeCritter(a, w);
+      c.timer = setTimeout(function () { wander(c); }, rand(300, 3000) + i * 120);
+    });
+    if (pend) {
+      var a = animalOf(w, pend);
+      p.pending = null; save();
+      if (a) {
+        var kind = kindOf(a, w);
+        var c = makeCritter(a, w, { isNew: true, enterFrom: Math.random() < 0.5 ? -12 : 112 });
+        setTimeout(function () {
+          var dest = kind === "water" && w.pond ? (w.pond[0] + w.pond[1]) / 2 : rand(38, 62);
+          var arrive = Math.abs(dest - c.x) / speedOf(kind, true) * 1000;
+          wander(c, dest);
+          setTimeout(function () { if (critters.indexOf(c) === -1) return; tapCritter(c); burst(c.el, 10, ["🎉", "✨", "⭐", "💖"]); }, reduceMotion ? 300 : arrive + 100);
+        }, 500);
+      }
+    }
+    if (have.length === 0) scene.appendChild(el("div", "empty", "🐾 " + w.name + " is waiting for its first animal!"));
+  }
+  function animalOf(w, id) { for (var i = 0; i < w.animals.length; i++) if (w.animals[i].id === id) return w.animals[i]; return null; }
+  function kindOf(a, w) { return a.k || (w.swim ? "swim" : ""); }
+  function speedOf(kind, steady) { return kind === "fly" ? 14 : kind === "swim" ? 9 : kind === "hop" ? 10 : kind === "floor" ? 4 : (steady ? 6.5 : rand(5, 8)); }
+
+  function setScenery(n, grow) {
+    var scene = $("scene"), parts = scene.querySelectorAll(".scenery"), growing = null;
+    scene.classList.add("instant");
+    for (var i = 0; i < parts.length; i++) {
+      var k = +parts[i].getAttribute("data-n");
+      if (grow && k === n) { parts[i].classList.remove("on"); growing = parts[i]; }
+      else parts[i].classList.toggle("on", k <= n);
+    }
+    void scene.offsetWidth; scene.classList.remove("instant");
+    if (growing) setTimeout(function () {
+      if (!growing.isConnected) return;
+      growing.classList.add("on"); sfx.pop();
+      setTimeout(function () { if (growing.isConnected) burst(growing, 8, ["✨", "🌟", "💚"]); }, 300);
+    }, reduceMotion ? 100 : 1400);
+  }
+
+  function makeCritter(a, w, opts) {
+    opts = opts || {};
+    var kind = kindOf(a, w), scene = $("scene");
+    var e = el("button", "critter" + (kind === "fly" || kind === "swim" ? " flyer" : "")); e.type = "button"; e.setAttribute("aria-label", a.name);
+    var bottom = kind === "fly" ? rand(55, 70) : kind === "swim" ? rand(24, 74) : kind === "floor" ? rand(4, 9) : kind === "water" ? rand(8, 13) : rand(5, 30);
+    var depth = (kind === "fly" || kind === "swim") ? 0.95 : 1.25 - (bottom - 4) / 26 * 0.45;
+    var base = Math.min(scene.clientWidth || 500, 600) / 520 * 2.3;
+    e.style.setProperty("--sz", (base * a.size * depth).toFixed(2) + "rem");
+    e.style.bottom = bottom + "%"; e.style.zIndex = String(100 - Math.round(bottom));
+    e.innerHTML = '<span class="shadow"></span><span class="face"><span class="body"></span></span><span class="bubble"></span>';
+    e.querySelector(".body").textContent = a.e; e.querySelector(".bubble").textContent = a.name + "!";
+    if (opts.isNew) { var tag = el("span", "new-tag", "NEW!"); e.appendChild(tag); setTimeout(function () { tag.remove(); }, 9000); }
+    var c = { el: e, a: a, w: w, kind: kind, x: 50, timer: null };
+    var sx = opts.enterFrom != null ? opts.enterFrom : (kind === "water" && w.pond ? rand(w.pond[0], w.pond[1]) : rand(8, 92));
+    setX(c, sx, 0); face(c, Math.random() < 0.5 ? -1 : 1);
+    e.addEventListener("click", function () { tapCritter(c); });
+    $("critters").appendChild(e); critters.push(c);
+    return c;
+  }
+  function setX(c, x, dur) { c.el.style.transitionDuration = (dur || 0) + "s"; c.el.style.left = x + "%"; c.x = x; }
+  function face(c, dir) { c.el.style.setProperty("--dir", dir === 1 ? -1 : 1); }  // emoji animals look left by default
+  function wander(c, first) {
+    if (critters.indexOf(c) === -1) return;
+    var target = first != null ? first : (c.kind === "water" && c.w.pond ? rand(c.w.pond[0], c.w.pond[1]) : Math.max(6, Math.min(94, c.x + rand(-40, 40))));
+    var dist = Math.abs(target - c.x), dur = reduceMotion ? 0 : dist / speedOf(c.kind, first != null);
+    if (dist > 2) { face(c, target > c.x ? 1 : -1); c.el.classList.add("walking"); setX(c, target, dur); }
+    c.timer = setTimeout(function () {
+      c.el.classList.remove("walking");
+      if (c.kind === "hop" && Math.random() < 0.6) retrigger(c.el, "hopping");
+      c.timer = setTimeout(function () { wander(c); }, rand(1500, 5000));
+    }, dur * 1000 + 50);
+  }
+  function retrigger(e, cls) { e.classList.remove(cls); void e.offsetWidth; e.classList.add(cls); setTimeout(function () { e.classList.remove(cls); }, 1300); }
+  function tapCritter(c) {
+    sfx.pop(); retrigger(c.el, "jump"); c.el.classList.add("talk");
+    clearTimeout(c.talkT); c.talkT = setTimeout(function () { c.el.classList.remove("talk"); }, 2200);
+    say(c.a.name, 0.95); burst(c.el, 6, ["✨", "💛", "⭐"]);
+  }
+  function burst(anchor, n, chars) {
+    if (reduceMotion) return;
+    var scene = $("scene"), sr = scene.getBoundingClientRect(), ar = anchor.getBoundingClientRect();
+    var cx = ar.left + ar.width / 2 - sr.left, cy = ar.top + ar.height / 2 - sr.top - 24;
+    for (var i = 0; i < n; i++) (function (i) {
+      var s = el("span", "sparkle", chars[i % chars.length]);
+      s.style.left = cx + "px"; s.style.top = cy + "px";
+      var ang = Math.random() * Math.PI * 2, r = rand(30, 70);
+      s.style.setProperty("--dx", Math.cos(ang) * r + "px"); s.style.setProperty("--dy", (Math.sin(ang) * r - 20) + "px");
+      scene.appendChild(s); setTimeout(function () { s.remove(); }, 1000);
+    })(i);
+  }
+
+  // ---------- building a round ----------
+  function levelPool(level) {
+    if (level <= MAX_LEVEL) return LEVELS[level - 1];
+    return LEVELS.slice(MAX_LEVEL - 4).reduce(function (a, b) { return a.concat(b); }, []);   // Legend levels mix the hardest words
+  }
+  function buildRound(mode, wi) {
+    var p = P(), pool, lo, hi;
+    if (mode === "quest") { pool = levelPool(p.level); lo = 1; hi = Math.min(p.level, MAX_LEVEL); }
+    else { lo = wi * 4 + 1; hi = wi * 4 + 4; pool = []; for (var l = lo; l <= hi; l++) pool = pool.concat(LEVELS[l - 1]); }
+    var review = shuffle(Object.keys(p.missed).filter(function (k) { return ALL[k] && ALL[k].level >= lo && ALL[k].level <= hi; })).slice(0, 2).map(function (k) { return ALL[k]; });
+    var rest = shuffle(pool).filter(function (it) { return review.indexOf(it) === -1; })
+      .sort(function (a, b) { return (p.seen[a.w] || 0) - (p.seen[b.w] || 0); }).slice(0, ROUND - review.length);
+    return shuffle(review.concat(rest));
+  }
+
+  // ---------- playing ----------
+  var R = null, Q = null, tok = 0;
+  function startRound(mode, wi) {
+    var p = P(); audio();
+    if (mode === "quest") wi = worldIndex(p.level);
+    R = { mode: mode, wi: wi, level: p.level, items: buildRound(mode, wi), i: 0, res: [], combo: 0, tok: ++tok };
+    $("gTitle").textContent = mode === "quest" ? WORLDS[wi].icon + " Level " + p.level : WORLDS[wi].icon + " Practice";
+    setTint(WORLDS[wi]);
+    show("game"); renderQ();
+  }
+  function quitRound() { tok++; R = null; Q = null; renderHome(); }
+
+  function renderQ() {
+    var it = R.items[R.i], disp = spell(it), w = disp.toLowerCase(), n = w.length;
+    Q = { it: it, disp: disp, w: w, entry: [], locked: [], wrong: [], attempts: 0, helped: false, hints: 0, maxHints: Math.max(1, Math.floor(n / 3)), done: false, busy: false, tileMode: it.level <= 4, tiles: [] };
+    for (var i = 0; i < n; i++) { Q.entry.push(null); Q.locked.push(false); Q.wrong.push(false); }
+    if (Q.tileMode) {
+      var extra = it.level <= 2 ? 2 : 3, letters = w.split(""), abc = "abcdefghijklmnoprstuw".split("").filter(function (c) { return w.indexOf(c) === -1; });
+      shuffle(abc).slice(0, extra).forEach(function (c) { letters.push(c); });
+      do { letters = shuffle(letters); } while (letters.join("").indexOf(w) === 0);
+      Q.tiles = letters.map(function (c) { return { ch: c, used: false }; });
+    }
+    // picture or speaker
+    var wrap = $("qPicWrap"); wrap.innerHTML = "";
+    if (it.e) { var pic = el("div", "q-pic", it.e); pic.id = "qPic"; pic.setAttribute("aria-hidden", "true"); wrap.appendChild(pic); }
+    else { var sp = el("button", "q-pic speaker", "🔊"); sp.id = "qPic"; sp.type = "button"; sp.setAttribute("aria-label", "Hear the word"); sp.addEventListener("click", function () { speakQ(); }); wrap.appendChild(sp); }
+    renderSentence(false);
+    $("feedback").textContent = Q.tileMode ? "Tap the letters to spell the word" : (it.s ? "Listen, then spell the missing word" : "Spell the word");
+    $("feedback").className = "feedback info";
+    $("tiles").hidden = !Q.tileMode; $("kb").hidden = Q.tileMode;
+    $("hintBtn").disabled = false; $("checkBtn").disabled = false; $("delBtn").disabled = false;
+    $("hintBtn").textContent = "💡 Hint";
+    renderDots(); renderCombo(); renderSlots(); renderTiles();
+    var t = R.tok; setTimeout(function () { if (tok === t) speakQ(); }, 350);
+  }
+  function renderSentence(filled) {
+    var box = $("qSentence"), it = Q.it; box.innerHTML = "";
+    if (!it.s) { box.hidden = true; return; }
+    box.hidden = false;
+    var parts = it.s.split("_");
+    box.appendChild(document.createTextNode(parts[0]));
+    box.appendChild(el("span", "blank", filled ? wordInSentence() : " "));
+    box.appendChild(document.createTextNode(parts[1]));
+  }
+  function wordInSentence() { var d = Q.disp; return Q.it.s.charAt(0) === "_" ? d.charAt(0).toUpperCase() + d.slice(1) : d; }
+  function speakQ(slow) {
+    var it = Q.it, rate = slow ? 0.5 : 0.85;
+    if (it.s && !slow) say([Q.disp, it.s.replace("_", Q.disp), Q.disp], rate);
+    else say(Q.disp, rate);
+  }
+  function renderDots() {
+    var d = $("dots"); d.innerHTML = "";
+    R.items.forEach(function (_, i) { d.appendChild(el("i", (R.res[i] || "") + (i === R.i && !R.res[i] ? " cur" : ""))); });
+  }
+  function renderCombo() {
+    var c = $("combo");
+    if (R.combo >= 2) { c.textContent = "🔥 " + R.combo; c.className = "combo"; void c.offsetWidth; c.className = "combo on"; } else c.className = "combo";
+  }
+  function renderSlots() {
+    var box = $("slots"), n = Q.w.length, nextIdx = Q.done ? -1 : Q.entry.indexOf(null);
+    box.className = "slots" + (n > 12 ? " xlong" : n > 8 ? " long" : "");
+    box.innerHTML = "";
+    for (var i = 0; i < n; i++) (function (i) {
+      var e = Q.entry[i], b = el("button", "s"); b.type = "button";
+      if (Q.reveal) { b.textContent = Q.disp[i]; b.className += " reveal"; }
+      else if (e) { b.textContent = Q.done ? Q.disp[i] : e.ch; b.className += Q.locked[i] ? " locked" : Q.wrong[i] ? " wrong" : " filled"; }
+      else if (i === nextIdx) b.className += " next";
+      b.setAttribute("aria-label", e ? "Letter " + e.ch : "Empty");
+      b.addEventListener("click", function () { removeAt(i); });
+      box.appendChild(b);
+    })(i);
+    var full = !Q.done && Q.entry.indexOf(null) === -1;
+    $("checkBtn").classList.toggle("pulse", full && !Q.busy);
+  }
+  function renderTiles() {
+    var box = $("tiles"); if (!Q.tileMode) { box.innerHTML = ""; return; }
+    box.innerHTML = "";
+    Q.tiles.forEach(function (t, i) {
+      var b = el("button", "tile" + (t.used ? " used" : ""), t.ch); b.type = "button"; b.setAttribute("aria-label", "Letter " + t.ch);
+      b.addEventListener("click", function () { addLetter(t.ch, i); });
+      box.appendChild(b);
+    });
+  }
+  function nudge(id) { var e = $(id); e.classList.remove("nudge"); void e.offsetWidth; e.classList.add("nudge"); }
+
+  function addLetter(ch, tileIdx) {
+    if (!Q || Q.done || Q.busy) return;
+    var i = Q.entry.indexOf(null); if (i === -1) { nudge("slots"); return; }
+    if (Q.tileMode) {
+      if (tileIdx == null) { tileIdx = -1; for (var k = 0; k < Q.tiles.length; k++) if (!Q.tiles[k].used && Q.tiles[k].ch === ch) { tileIdx = k; break; } }
+      if (tileIdx === -1 || Q.tiles[tileIdx].used) { nudge("tiles"); return; }
+      Q.tiles[tileIdx].used = true;
+    }
+    Q.entry[i] = { ch: ch, t: tileIdx }; sfx.key();
+    renderSlots(); renderTiles();
+  }
+  function clearAt(i) { var e = Q.entry[i]; if (!e) return; if (Q.tileMode && e.t != null && e.t >= 0) Q.tiles[e.t].used = false; Q.entry[i] = null; Q.wrong[i] = false; }
+  function removeAt(i) { if (!Q || Q.done || Q.busy || Q.locked[i] || !Q.entry[i]) return; clearAt(i); sfx.del(); renderSlots(); renderTiles(); }
+  function backspace() {
+    if (!Q || Q.done || Q.busy) return;
+    for (var i = Q.w.length - 1; i >= 0; i--) if (Q.entry[i] && !Q.locked[i]) { clearAt(i); sfx.del(); renderSlots(); renderTiles(); return; }
+  }
+  function hint() {
+    if (!Q || Q.done || Q.busy || Q.hints >= Q.maxHints) return;
+    var idx = -1; for (var i = 0; i < Q.w.length; i++) if (!Q.locked[i]) { idx = i; break; }
+    if (idx === -1) return;
+    var ch = Q.w[idx]; clearAt(idx);
+    var t = null;
+    if (Q.tileMode) {
+      t = -1; for (var k = 0; k < Q.tiles.length; k++) if (!Q.tiles[k].used && Q.tiles[k].ch === ch) { t = k; break; }
+      if (t === -1) for (var j = 0; j < Q.w.length; j++) if (Q.entry[j] && !Q.locked[j] && Q.entry[j].ch === ch) { t = Q.entry[j].t; Q.entry[j] = null; break; }
+      if (t >= 0) Q.tiles[t].used = true;
+    }
+    // close any gap so letters stay in order around the hint
+    Q.entry[idx] = { ch: ch, t: t }; Q.locked[idx] = true; Q.helped = true; Q.hints++;
+    sfx.pop();
+    $("feedback").className = "feedback info"; $("feedback").textContent = "Here is a letter to help you.";
+    if (Q.hints >= Q.maxHints) $("hintBtn").disabled = true;
+    renderSlots(); renderTiles();
+  }
+
+  function check() {
+    if (!Q || Q.done || Q.busy) return;
+    if (Q.entry.indexOf(null) !== -1) { nudge("slots"); $("feedback").className = "feedback info"; $("feedback").textContent = "Fill in every letter first."; return; }
+    var guess = Q.entry.map(function (e) { return e.ch; }).join(""), fb = $("feedback"), t = R.tok, i;
+    if (guess === Q.w) {
+      Q.done = true; for (i = 0; i < Q.w.length; i++) Q.locked[i] = true;
+      var first = Q.attempts === 0 && !Q.helped;
+      R.res[R.i] = first ? "first" : "ok";
+      R.combo = first ? R.combo + 1 : 0;
+      fb.className = "feedback good";
+      fb.textContent = (first ? pick(["Yes!", "Brilliant!", "Super!", "Spot on!", "Amazing!"]) : pick(["You got there!", "Well done!", "Nice fixing!"])) + " “" + Q.disp + "” is right! 🎉";
+      var pic = $("qPic"); if (pic && Q.it.e) pic.className = "q-pic happy";
+      renderSentence(true); sfx.good(R.combo); endQ(1150);
+    } else {
+      Q.attempts++; sfx.bad();
+      if (Q.attempts < 2) {
+        Q.busy = true; var right = 0;
+        for (i = 0; i < Q.w.length; i++) { if (Q.entry[i].ch === Q.w[i]) { Q.locked[i] = true; right++; } else if (!Q.locked[i]) Q.wrong[i] = true; }
+        fb.className = "feedback bad";
+        fb.textContent = right ? "So close! The green letters are right. Fix the rest." : "Not quite. Listen again and have another go!";
+        renderSlots();
+        setTimeout(function () {
+          if (tok !== t || !Q) return;
+          for (var j = 0; j < Q.w.length; j++) if (Q.wrong[j]) clearAt(j);
+          Q.busy = false; renderSlots(); renderTiles(); speakQ();
+        }, 1100);
+      } else {
+        Q.done = true; Q.reveal = true; R.res[R.i] = "miss"; R.combo = 0;
+        fb.className = "feedback info"; fb.textContent = "It is spelled “" + Q.disp + "”. You will get another go at it soon!";
+        renderSentence(true);
+        say([Q.disp, Q.w.toUpperCase().split("").join(", "), Q.disp], 0.8);
+        endQ(Math.min(5200, 2400 + Q.w.length * 230));
+      }
+    }
+  }
+  function endQ(ms) {
+    $("hintBtn").disabled = true; $("checkBtn").disabled = true; $("delBtn").disabled = true;
+    renderSlots(); renderDots(); renderCombo();
+    var t = R.tok;
+    setTimeout(function () { if (tok !== t) return; R.i++; if (R.i < R.items.length) renderQ(); else finishRound(); }, ms);
+  }
+
+  // ---------- finishing ----------
+  function finishRound() {
+    var p = P(), first = 0, ok = 0, n = R.items.length;
+    R.res.forEach(function (r, i) {
+      var k = R.items[i].w; p.seen[k] = (p.seen[k] || 0) + 1;
+      if (r === "first") { first++; delete p.missed[k]; } else if (r === "ok") ok++; else p.missed[k] = 1;
+    });
+    var correct = first + ok;
+    var stars = (correct === n && first >= n - 1) ? 3 : correct >= n - 2 ? 2 : 1;
+    p.words = (p.words || 0) + correct;
+    var today = dayKey();
+    if (!p.streak) p.streak = { day: null, count: 0 };
+    if (p.streak.day !== today) { p.streak.count = p.streak.day === dayKey(new Date(Date.now() - 864e5)) ? p.streak.count + 1 : 1; p.streak.day = today; }
+
+    var out = { correct: correct, n: n, stars: stars, levelUp: false, newWorld: null, animal: null, world: WORLDS[R.wi], brings: null, mode: R.mode, gained: 0 };
+    if (R.mode === "quest") {
+      out.gained = Math.min(stars, STARS_NEEDED - p.stars);
+      p.stars += stars;
+      if (p.stars >= STARS_NEEDED) {
+        p.stars = 0; p.level++; out.levelUp = true;
+        if (p.level <= MAX_LEVEL && (p.level - 1) % 4 === 0) out.newWorld = WORLDS[worldIndex(p.level)];
+      }
+    }
+    if (correct >= 5) {
+      var w = WORLDS[R.wi], have = owned(p, w), left = w.animals.filter(function (a) { return have.indexOf(a.id) === -1; });
+      if (!left.length) {   // this world is full: look in other open worlds
+        for (var i = 0; i < WORLDS.length && !left.length; i++) {
+          if (p.level - (out.levelUp ? 1 : 0) < WORLDS[i].from) continue;
+          w = WORLDS[i]; have = owned(p, w); left = w.animals.filter(function (a) { return have.indexOf(a.id) === -1; });
+        }
+      }
+      if (left.length) {
+        var a = pick(left);
+        if (!p.animals[w.id]) p.animals[w.id] = [];
+        p.animals[w.id].push(a.id); p.pending = { w: w.id, a: a.id };
+        out.animal = a; out.world = w; out.brings = w.items[owned(p, w).length - 1].label;
+      }
+    }
+    save(); showResults(out);
+  }
+
+  function showResults(o) {
+    var p = P(), i;
+    show("results");
+    var sr = $("resStars"); sr.innerHTML = "";
+    for (i = 0; i < 3; i++) { var s = el("span", i < o.stars ? "on" : "", "⭐"); s.setAttribute("aria-hidden", "true"); if (i < o.stars) s.style.animationDelay = (i * 0.18) + "s"; sr.appendChild(s); }
+    $("resScore").textContent = o.correct + " / " + o.n;
+    $("resMsg").textContent = o.stars === 3 ? "Spelling superstar!" : o.stars === 2 ? "Awesome spelling! Keep it up!" : "Good practice! Every try makes you stronger.";
+
+    var lb = $("lvlBox"); lb.innerHTML = ""; lb.className = "lvl-box"; lb.hidden = o.mode !== "quest";
+    if (o.mode === "quest") {
+      if (o.levelUp) {
+        lb.className = "lvl-box up";
+        lb.appendChild(el("div", "t", "🎉 LEVEL UP! Level " + p.level));
+        lb.appendChild(el("small", null, o.newWorld ? "New world unlocked: " + o.newWorld.icon + " " + o.newWorld.name + "!" : "The words get trickier now. You are ready!"));
+        setTimeout(function () { sfx.levelup(); launchConfetti(60); }, 500);
+      } else {
+        lb.appendChild(el("div", "t", "Level " + p.level));
+        var sb = el("div", "starbar"); lb.appendChild(sb); renderStarbar(sb, p.stars, o.gained);
+        var left = STARS_NEEDED - p.stars;
+        lb.appendChild(el("small", null, left + (left === 1 ? " more star" : " more stars") + " to reach Level " + (p.level + 1)));
+      }
+    }
+    renderReward(o);
+
+    var wl = $("wordList"); wl.innerHTML = "";
+    R.items.forEach(function (it, k) {
+      var r = R.res[k], b = el("button", r, (r === "miss" ? "✗ " : r === "ok" ? "〜 " : "✓ ") + spell(it)); b.type = "button";
+      b.setAttribute("aria-label", spell(it) + (r === "miss" ? ", missed" : r === "ok" ? ", right with help" : ", right first time"));
+      b.addEventListener("click", function () { say(spell(it)); });
+      wl.appendChild(b);
+    });
+    $("againBtn").textContent = o.mode === "quest" ? "▶ Play Level " + p.level : "▶ Practise again";
+    $("worldBtn").textContent = o.animal ? "See " + o.animal.name.split(" ")[0] + " arrive" : "See my world";
+    if (o.correct >= 5 && !o.levelUp) launchConfetti(o.stars === 3 ? 45 : 22);
+  }
+
+  function renderReward(o) {
+    var r = $("reward"), a = o.animal; r.className = "reward"; r.innerHTML = "";
+    var stage = el("div", "stage"); stage.appendChild(el("div", "rays"));
+    var title = el("div", "r-title"), sub = el("div", "r-sub");
+    r.appendChild(stage); r.appendChild(title); r.appendChild(sub);
+    if (a) {
+      var gift = el("button", "gift", "🎁"); gift.type = "button"; gift.setAttribute("aria-label", "Open your surprise");
+      stage.appendChild(gift);
+      title.textContent = "You won a surprise!"; sub.textContent = "Someone wants to join " + o.world.name + "...";
+      var opened = false, shakeT = setInterval(function () { if (!opened && $("results").classList.contains("active")) sfx.shake(); }, 500);
+      var open = function () {
+        if (opened) return; opened = true; clearInterval(shakeT);
+        if (!gift.isConnected) return;
+        gift.classList.add("open");
+        setTimeout(function () {
+          if (!gift.isConnected) return;
+          gift.remove(); var pz = el("span", "prize", a.e); pz.setAttribute("aria-hidden", "true"); stage.appendChild(pz);
+          r.classList.add("revealed");
+          title.textContent = a.name + " joined " + o.world.name + "!";
+          sub.textContent = "They brought " + o.brings.replace(/^\S+\s/, "") + " with them.";
+          if ($("results").classList.contains("active")) { sfx.fanfare(); say(a.name + " joined your world!", 0.95); }
+        }, 380);
+      };
+      gift.addEventListener("click", open);
+      setTimeout(open, reduceMotion ? 200 : (o.levelUp ? 2600 : 1600));
+    } else if (o.correct >= 5) {
+      stage.appendChild(el("span", "prize", "🏆")); r.classList.add("revealed");
+      title.textContent = "Every animal is home!"; sub.textContent = "Level up to unlock a new world with new animals.";
+    } else {
+      var pw = P(), have = owned(pw, o.world), next = o.world.animals.filter(function (x) { return have.indexOf(x.id) === -1; });
+      stage.appendChild(el("span", "peek", next.length ? pick(next).e : "🐾"));
+      title.textContent = "A mystery animal is hiding!"; sub.textContent = "Spell 5 or more words right to bring a new friend home.";
+    }
+  }
+
+  function launchConfetti(count) {
+    if (reduceMotion) return;
+    for (var i = 0; i < count; i++) (function () {
+      var c = el("div", "confetti");
+      c.style.left = (Math.random() * 100) + "vw"; c.style.background = pick(CONFETTI);
+      c.style.animationDuration = (2 + Math.random() * 1.6) + "s"; c.style.animationDelay = (Math.random() * 0.5) + "s"; c.style.width = rand(7, 12) + "px";
+      document.body.appendChild(c); setTimeout(function () { c.remove(); }, 4400);
+    })();
+  }
+
+  // ---------- settings ----------
+  function seg(id, value, onPick) {
+    var bs = $(id).querySelectorAll("button");
+    for (var i = 0; i < bs.length; i++) (function (b) {
+      b.classList.toggle("on", b.getAttribute("data-v") === (value ? "1" : "0"));
+      b.onclick = function () { onPick(b.getAttribute("data-v") === "1"); save(); renderSettings(); };
+    })(bs[i]);
+  }
+  var delArmed = false;
+  function renderSettings() {
+    seg("segSound", db.settings.sound, function (v) { db.settings.sound = v; if (v) setTimeout(sfx.pop, 0); });
+    seg("segVoice", db.settings.voice, function (v) { db.settings.voice = v; if (!v) hush(); else setTimeout(function () { say("Hello!"); }, 0); });
+    seg("segSpell", db.settings.us, function (v) { db.settings.us = v; });
+    $("spellEg").textContent = db.settings.us ? "color, favorite, center" : "colour, favourite, centre";
+    var p = P(); $("playerSettings").hidden = !p || $("game").classList.contains("active");
+    if (p) { $("setName").textContent = p.name; $("setLvl").textContent = p.level; }
+    delArmed = false; $("deletePlayer").textContent = "Delete this player";
+  }
+  function openSettings() { renderSettings(); $("settings").classList.add("open"); }
+  function closeSettings() { $("settings").classList.remove("open"); if ($("home").classList.contains("active")) renderHome(); }
+  function bumpLevel(d) { var p = P(); if (!p) return; var nl = Math.max(1, Math.min(MAX_LEVEL, p.level + d)); if (nl === p.level) return; p.level = nl; p.stars = 0; viewW = null; save(); renderSettings(); }
+
+  // ---------- wiring ----------
+  var rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"], kb = $("kb");
+  rows.forEach(function (row) {
+    var r = el("div", "r");
+    row.split("").forEach(function (ch) { var b = el("button", null, ch); b.type = "button"; b.addEventListener("click", function () { addLetter(ch); }); r.appendChild(b); });
+    kb.appendChild(r);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!$("game").classList.contains("active") || $("settings").classList.contains("open") || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "Enter") { e.preventDefault(); check(); }
+    else if (e.key === "Backspace") { e.preventDefault(); backspace(); }
+    else if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); addLetter(e.key.toLowerCase()); }
+  });
+  $("checkBtn").addEventListener("click", check);
+  $("delBtn").addEventListener("click", backspace);
+  $("hintBtn").addEventListener("click", hint);
+  $("hearBtn").addEventListener("click", function () { if (Q) speakQ(); });
+  $("slowBtn").addEventListener("click", function () { if (Q) speakQ(true); });
+  $("quitBtn").addEventListener("click", quitRound);
+  $("playBtn").addEventListener("click", function () { startRound("quest"); });
+  $("practiceBtn").addEventListener("click", function () { startRound("practice", viewW); });
+  $("againBtn").addEventListener("click", function () { var m = R ? R.mode : "quest", wi = R ? R.wi : 0, p = P(); if (m === "practice" && p.level >= WORLDS[wi].from) startRound("practice", wi); else startRound("quest"); });
+  $("worldBtn").addEventListener("click", function () { viewW = null; renderHome(); });
+  $("playerChip").addEventListener("click", function () { tok++; renderProfiles(); });
+  $("settingsBtn").addEventListener("click", openSettings);
+  $("closeSettings").addEventListener("click", closeSettings);
+  $("settings").addEventListener("click", function (e) { if (e.target === $("settings")) closeSettings(); });
+  $("lvlDown").addEventListener("click", function () { bumpLevel(-1); });
+  $("lvlUp").addEventListener("click", function () { bumpLevel(1); });
+  $("deletePlayer").addEventListener("click", function () {
+    var p = P(); if (!p) return;
+    if (!delArmed) { delArmed = true; $("deletePlayer").textContent = "Tap again to delete " + p.name + " and all their animals"; return; }
+    db.profiles = db.profiles.filter(function (x) { return x.id !== p.id; }); db.current = null; save();
+    $("settings").classList.remove("open"); renderProfiles();
+  });
+  $("createBtn").addEventListener("click", createProfile);
+  $("nameInput").addEventListener("keydown", function (e) { if (e.key === "Enter") createProfile(); });
+  $("cancelNew").addEventListener("click", function () { renderProfiles(); });
+  var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { if ($("home").classList.contains("active") && P()) renderWorld(P(), WORLDS[viewW]); }, 300); });
+
+  if (P()) renderHome(); else renderProfiles();
+})();
+</script>
+</body>
+</html>
