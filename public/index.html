@@ -865,7 +865,7 @@ function ttsTexts() {
     } catch (e) { return null; }
   }
   // narrator voices: folder in audio/ -> label in Settings. The first one is the default.
-  var NARRATORS = { pandora: "British", theia: "Australian" };
+  var NARRATORS = { lily: "Lily 🇬🇧", pandora: "Pandora 🇬🇧", theia: "Theia 🇦🇺" };
   function narrator() { return NARRATORS[db.settings.narrator] ? db.settings.narrator : Object.keys(NARRATORS)[0]; }
   function clipUrl(t) { return "audio/" + narrator() + "/" + vhash(t) + ".mp3"; }
   function loadClip(t) {

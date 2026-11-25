@@ -60,7 +60,10 @@ if (mode === "texts") {
 } else if (mode === "eleven") {
   // ElevenLabs: node tools/gen-audio.mjs eleven <folder> <voice-id> [model]
   // Reads your key from the ELEVENLABS_API_KEY environment variable. Safe to stop and re-run: it skips lines already recorded.
-  const key = process.env.ELEVENLABS_API_KEY, folder = a, voiceId = b, model = c || "eleven_multilingual_v2";
+  // The key comes from ELEVENLABS_API_KEY, or from a line "ELEVENLABS_API_KEY=..." in .env.local (git ignores that file).
+  let key = process.env.ELEVENLABS_API_KEY;
+  try { if (!key) key = (fs.readFileSync(path.join(root, ".env.local"), "utf8").match(/ELEVENLABS_API_KEY\s*=\s*["']?([^\s"']+)/) || [])[1]; } catch (e) {}
+  const folder = a, voiceId = b, model = c || "eleven_multilingual_v2";
   if (!key || !folder || !voiceId) { console.log("usage: ELEVENLABS_API_KEY=... node tools/gen-audio.mjs eleven <folder> <voice-id> [model]"); process.exit(1); }
   await record(folder, (t) => fetch("https://api.elevenlabs.io/v1/text-to-speech/" + voiceId + "?output_format=mp3_44100_64", {
     method: "POST",

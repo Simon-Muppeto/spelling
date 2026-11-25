@@ -6,7 +6,7 @@ A free spelling game for kids of every level, live at https://spelling.world
 - Win animals and scenery for each world by spelling words correctly
 - Earn treats as you spell and feed them to your animals. Five treats makes an animal your best friend
 - Every round ends with a golden word worth double treats, plus streak banners and a daily bonus
-- A natural, recorded narrator voice reads every word, sentence and cheer
+- A natural, recorded narrator voice reads every word, sentence and cheer (Lily from ElevenLabs by default, with two Cloudflare voices to choose from in Settings)
 - Player profiles, NZ/UK or US spelling. No build step, no accounts, no tracking. Progress is saved in the browser
 
 ## Layout
@@ -25,9 +25,12 @@ node tools/gen-audio.mjs texts
 Commit and push so the function knows the new lines, then record them and push again:
 
 ```bash
+node tools/gen-audio.mjs eleven lily pFZP5JQG7iQjIQuC4Bku
 node tools/gen-audio.mjs fetch https://spelling.world pandora
 node tools/gen-audio.mjs fetch https://spelling.world theia
 ```
+
+The ElevenLabs line reads your key from `ELEVENLABS_API_KEY` or from `.env.local` (which git ignores).
 
 ## Deploy
 
