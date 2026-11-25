@@ -685,6 +685,38 @@ function buildSceneSVG(w) {
   });
   return out + '</svg>';
 }
+
+// ---------- Everything the narrator can say (pre-recorded in /audio, see tools/gen-audio.mjs) ----------
+var PHRASES = {
+  praise: ["Brilliant!", "Yes! Spot on!", "Amazing spelling!", "You got it!", "Super!", "Fantastic!", "Wow, perfect!", "Nailed it!", "Awesome!", "Excellent spelling!"],
+  fixed: ["You got there!", "Well done for fixing it!", "Great fixing!", "Yes! You worked it out!"],
+  combo3: "Three in a row!", combo5: "Five in a row! You're on fire!", perfect: "A perfect round! Incredible!",
+  close: "So close! The green letters are right.", miss: "Not quite. Listen again and have another go.",
+  together: "Let's spell it together.", later: "You'll get another go at it soon.",
+  hint: "Here's a letter to help you.", golden: "Golden word! Double treats!",
+  yum: ["Yum!", "Delicious!", "Mmm, thank you!", "Yummy!"], hungry: "Spell words to earn more treats!",
+  star3: "Spelling superstar!", star2: "Awesome spelling! Keep it up!", star1: "Good practice! Every try makes you stronger.",
+  levelup: "Level up!", surprise: "You won a surprise!", daily: "Daily bonus! Ten extra treats!"
+};
+var LETTER_SAY = { a: "Ay.", b: "Bee.", c: "See.", d: "Dee.", e: "Ee.", f: "Eff.", g: "Gee.", h: "Aitch.", i: "Eye.", j: "Jay.", k: "Kay.", l: "Ell.", m: "Em.", n: "En.", o: "Oh.", p: "Pee.", q: "Queue.", r: "Are.", s: "Ess.", t: "Tee.", u: "You.", v: "Vee.", w: "Double you.", x: "Ex.", y: "Why.", z: "Zed." };
+var BEST_FRIEND = 5;   // treats it takes for an animal to become a best friend
+function sentenceOf(it, word) { return it.s.replace("_", it.s.charAt(0) === "_" ? word.charAt(0).toUpperCase() + word.slice(1) : word); }
+function joinedLine(a) { return a.name + " joined your world!"; }
+function friendLine(a) { return a.name.split(" ")[0] + " is your best friend!"; }
+function welcomeLine(w) { return "Welcome to the " + w.name + "!"; }
+// FNV-1a hash of the spoken text names its audio file: audio/<hash>.mp3
+function vhash(t) { var h = 0x811c9dc5; for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ("0000000" + h.toString(16)).slice(-8); }
+function ttsTexts() {
+  var out = {};
+  function add(t) { [].concat(t).forEach(function (x) { out[x] = 1; }); }
+  Object.keys(PHRASES).forEach(function (k) { add(PHRASES[k]); });
+  Object.keys(LETTER_SAY).forEach(function (k) { add(LETTER_SAY[k]); }); add("Zee.");
+  LEVELS.forEach(function (lv) { lv.forEach(function (it) {
+    [it.w].concat(it.us ? [it.us] : []).forEach(function (w) { add(w); if (it.s) add(sentenceOf(it, w)); });
+  }); });
+  WORLDS.forEach(function (w) { add(welcomeLine(w)); w.animals.forEach(function (a) { add([a.name + "!", joinedLine(a), friendLine(a)]); }); });
+  return Object.keys(out);
+}
 (function () {
   "use strict";
 
