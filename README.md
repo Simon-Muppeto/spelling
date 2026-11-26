@@ -7,6 +7,7 @@ A free spelling game for kids of every level, live at https://spelling.world
 - Earn treats as you spell and feed them to your animals. Five treats makes an animal your best friend
 - Every round ends with a golden word worth double treats, plus streak banners and a daily bonus
 - A natural, recorded narrator voice reads every word, sentence and cheer (Lily from ElevenLabs by default, with two Cloudflare voices to choose from in Settings)
+- Levels 1 to 4 sound each word out like at school, with pure sounds (c-a-t, sh-i-p, c-a_e-k) and sound buttons under the letters that light up as each sound plays. It can be turned off in Settings
 - Player profiles, NZ/UK or US spelling. No build step, no accounts, no tracking. Progress is saved in the browser
 
 ## Layout
@@ -30,7 +31,9 @@ node tools/gen-audio.mjs fetch https://spelling.world pandora
 node tools/gen-audio.mjs fetch https://spelling.world theia
 ```
 
-The ElevenLabs line reads your key from `ELEVENLABS_API_KEY` or from `.env.local` (which git ignores).
+The phonics sounds (`public/audio/phonics/`) come from `node tools/gen-audio.mjs phonics`, which records each sound in `PHONEMES` with an ElevenLabs IPA phoneme tag. How each word splits into sounds is in `PHONICS` in `public/index.html`.
+
+The ElevenLabs lines read your key from `ELEVENLABS_API_KEY` or from `.env.local` (which git ignores).
 
 ## Deploy
 
