@@ -284,17 +284,6 @@
   .slots .s.wrong { background: var(--coral); color: #fff; animation: shake 0.4s; }
   .slots .s.reveal { background: var(--turq); color: #fff; }
   .slots.nudge { animation: shake 0.35s; }
-  /* sound buttons: a dot under each single sound, a bar under letters that make one sound together */
-  .slots.marked { margin-bottom: 14px; }
-  .slots.marked .s { position: relative; }
-  .slots.marked .s::after { content: ""; position: absolute; top: calc(100% + 9px); height: 6px; border-radius: 3px; background: var(--purple); opacity: 0.45; transition: opacity 0.15s; }
-  .slots .s.m-dot::after { left: 50%; width: 8px; height: 8px; margin-left: -4px; top: calc(100% + 8px); border-radius: 50%; }
-  .slots .s.m-bs::after { left: 18%; right: -3px; border-radius: 3px 0 0 3px; }
-  .slots .s.m-bm::after { left: -3px; right: -3px; border-radius: 0; }
-  .slots .s.m-be::after { left: -3px; right: 18%; border-radius: 0 3px 3px 0; }
-  .slots .s.m-mag::after { left: 50%; width: 8px; height: 8px; margin-left: -4px; top: calc(100% + 8px); border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 2px var(--purple); }
-  .slots .s.snd { transform: translateY(-5px) scale(1.06); box-shadow: 0 0 0 3px var(--purple); }
-  .slots .s.snd::after { opacity: 1; }
   @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
   .feedback { min-height: 26px; text-align: center; font-weight: 800; font-size: 1rem; }
   .feedback.good { color: var(--green-d); } .feedback.bad { color: var(--red); } .feedback.info { color: var(--soft); }
@@ -493,7 +482,6 @@
     <div class="set-row"><div>Sound effects</div><div class="seg" id="segSound"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div></div>
     <div class="set-row"><div>Read words aloud<small>Needed for the harder levels</small></div><div class="seg" id="segVoice"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div></div>
     <div class="set-row"><div>Narrator voice<small>Tap to hear them</small></div><div class="seg" id="segNarrator"></div></div>
-    <div class="set-row"><div>Sound out words<small>Says each sound, like at school (Levels 1 to 4)</small></div><div class="seg" id="segPhonics"><button data-v="1" type="button">On</button><button data-v="0" type="button">Off</button></div></div>
     <h3>Spelling</h3>
     <div class="set-row"><div>Word spellings<small id="spellEg"></small></div><div class="seg" id="segSpell"><button data-v="0" type="button">NZ / UK</button><button data-v="1" type="button">US</button></div></div>
     <div id="playerSettings">
@@ -780,23 +768,6 @@ var PHRASES = {
   levelup: "Level up!", surprise: "You won a surprise!", daily: "Daily bonus! Ten extra treats!"
 };
 var LETTER_SAY = { a: "Ay.", b: "Bee.", c: "See.", d: "Dee.", e: "Ee.", f: "Eff.", g: "Gee.", h: "Aitch.", i: "Eye.", j: "Jay.", k: "Kay.", l: "Ell.", m: "Em.", n: "En.", o: "Oh.", p: "Pee.", q: "Queue.", r: "Are.", s: "Ess.", t: "Tee.", u: "You.", v: "Vee.", w: "Double you.", x: "Ex.", y: "Why.", z: "Zed." };
-// ---------- Phonics: how the level 1 to 4 words are sounded out, the way it's taught at school ----------
-// Each word is split into graphemes. "sh" alone means the letters make their usual sound; "ck=k" means
-// these letters make the k sound; "e=^" is the magic e that joins the vowel before it (c-a-k-e is c / a_e / k).
-var PHONICS = (
-  "cat:c=k a t|dog:d o g|sun:s u n|hat:h a t|pig:p i g|bus:b u s|bed:b e d|fox:f o x|cup:c=k u p|bee:b ee|ant:a n t|owl:ow l|bat:b a t|egg:e gg=g|" +
-  "pie:p ie=igh|car:c=k ar|van:v a n|bug:b u g|key:k ey=ee|box:b o x|cow:c=k ow|hen:h e n|" +
-  "fish:f i sh|bird:b ir=ur d|star:s t ar|moon:m oo n|ball:b a=or ll=l|tree:t r ee|frog:f r o g|duck:d u ck=k|book:b oo=ooh k|milk:m i l k|corn:c=k or n|" +
-  "cake:c=k a=ai k e=^|ship:sh i p|boat:b oa t|bike:b i=igh k e=^|crab:c=k r a b|bear:b ear=air|lion:l i=igh o=er n|door:d oor=or|sock:s o ck=k|" +
-  "drum:d r u m|ring:r i ng|kite:k i=igh t e=^|leaf:l ea=ee f|rain:r ai n|fire:f i=igh re=er|hand:h a n d|nose:n o=oa s=z e=^|bell:b e ll=l|bone:b o=oa n e=^|" +
-  "coat:c=k oa t|shoe:sh oe=oo|gift:g i f t|lock:l o ck=k|rose:r o=oa s=z e=^|goat:g oa t|wolf:w o=ooh l f|tent:t e n t|pear:p ear=air|bowl:b ow=oa l|" +
-  "apple:a pp=p le=l|horse:h or se=s|mouse:m ou=ow se=s|snake:s n a=ai k e=^|whale:wh=w a=ai l e=^|tiger:t i=igh g er|zebra:z e b r a=er|sheep:sh ee p|" +
-  "house:h ou=ow se=s|train:t r ai n|plane:p l a=ai n e=^|truck:t r u ck=k|bread:b r ea=e d|pizza:p i=ee zz=ts a=er|grape:g r a=ai p e=^|lemon:l e m o=er n|" +
-  "chair:ch air|clock:c=k l o ck=k|cloud:c=k l ou=ow d|heart:h ear=ar t|crown:c=k r ow n|robot:r o=oa b o t|ghost:gh=g o=oa s t|shark:sh ar k"
-).split("|").reduce(function (m, e) { var p = e.split(":"); m[p[0]] = p[1].split(" ").map(function (t) { var q = t.split("="); return { g: q[0], p: q[1] || q[0] }; }); return m; }, {});
-// The pure sound for each phoneme code, in IPA (a long mark ː stretches sounds you can hold, like mmm and sss)
-var PHONEMES = { k: "k", a: "æ", t: "t", d: "d", o: "ɒ", g: "ɡ", s: "sː", u: "ʌ", n: "nː", h: "h", p: "p", i: "ɪ", b: "b", f: "fː", x: "ks", ee: "iː", l: "lː", ow: "aʊ", e: "ɛ", igh: "aɪ", ar: "ɑː", v: "vː", sh: "ʃː", ur: "ɜː", m: "mː", oo: "uː", or: "ɔː", r: "ɹ", ooh: "ʊ", ai: "eɪ", oa: "əʊ", air: "ɛə", er: "ə", ng: "ŋː", z: "zː", w: "w", ch: "tʃ", ts: "ts" };
-function phonLine(code) { return "phon:" + code; }
 var BEST_FRIEND = 5;   // treats it takes for an animal to become a best friend
 function sentenceOf(it, word) { return it.s.replace("_", it.s.charAt(0) === "_" ? word.charAt(0).toUpperCase() + word.slice(1) : word); }
 function joinedLine(a) { return a.name + " joined your world!"; }
@@ -850,7 +821,6 @@ function ttsTexts() {
   function worldIndex(level) { return Math.min(WORLDS.length - 1, Math.floor((level - 1) / 4)); }
   function owned(p, w) { return (p.animals[w.id] || []).filter(function (id) { return w.animals.some(function (a) { return a.id === id; }); }); }
   function spell(it) { return db.settings.us && it.us ? it.us : it.w; }
-  function phonicsOn() { return db.settings.phonics !== false; }
 
   // ---------- sound ----------
   function audio() { var c = vctx(); return db.settings.sound ? c : null; }   // one audio context for sound effects and the narrator
@@ -897,7 +867,7 @@ function ttsTexts() {
   // narrator voices: folder in audio/ -> label in Settings. The first one is the default.
   var NARRATORS = { lily: "Lily 🇬🇧", pandora: "Pandora 🇬🇧", theia: "Theia 🇦🇺" };
   function narrator() { return NARRATORS[db.settings.narrator] ? db.settings.narrator : Object.keys(NARRATORS)[0]; }
-  function clipUrl(t) { return "audio/" + (t.indexOf("phon:") === 0 ? "phonics" : narrator()) + "/" + vhash(t) + ".mp3"; }
+  function clipUrl(t) { return "audio/" + narrator() + "/" + vhash(t) + ".mp3"; }
   function loadClip(t) {
     if (clips[t]) return clips[t];
     var c = vctx(); if (!c) return Promise.resolve(null);
@@ -949,18 +919,11 @@ function ttsTexts() {
     hush(); var my = sayTok;
     Promise.all(texts.map(loadClip)).then(function (bufs) {
       if (my !== sayTok) return;
-      if (bufs.some(function (b) { return !b; })) {
-        if (opts.fallback) { opts.fallback(); return; }
-        synth(texts);
-        if (opts.each) texts.forEach(function (_, i) { setTimeout(function () { if (my === sayTok) opts.each(i); }, i * 800); });
-        if (opts.done) setTimeout(function () { if (my === sayTok) opts.done(); }, texts.length * 800);
-        return;
-      }
+      if (bufs.some(function (b) { return !b; })) { synth(texts); return; }
       var c = vctx(); if (!c) return;
       var t = c.currentTime + 0.04;
       bufs.forEach(function (b, i) {
         var s = c.createBufferSource(); s.buffer = b; s.connect(voiceOut); s.start(t); playing.push(s);
-        if (opts.each) setTimeout(function () { if (my === sayTok) opts.each(i); }, (t - c.currentTime) * 1000);
         t += b.duration + (opts.gaps ? opts.gaps[i] || 0 : opts.gap != null ? opts.gap : 0.3);
       });
       if (opts.done) setTimeout(function () { if (my === sayTok) opts.done(); }, (t - c.currentTime) * 1000);
@@ -975,17 +938,6 @@ function ttsTexts() {
       var pr = a.play(); if (pr && pr.catch) pr.catch(function () { synth([text], 0.5); });
       a.onerror = function () { synth([text], 0.5); };
     } catch (e) { synth([text], 0.5); }
-  }
-  // the sounds in a word, each with the letter positions that make it (the magic e joins its vowel)
-  function phonGroups(toks) {
-    var groups = [], pos = 0;
-    toks.forEach(function (t) {
-      var idx = []; for (var k = 0; k < t.g.length; k++) idx.push(pos + k);
-      if (t.p === "^") { for (var j = groups.length - 1; j >= 0; j--) if (/^[aeiou]$/.test(groups[j].g)) { groups[j].idx = groups[j].idx.concat(idx); groups[j].magic = true; break; } }
-      else groups.push({ g: t.g, p: t.p, idx: idx });
-      pos += t.g.length;
-    });
-    return groups;
   }
   function spellOut(word, done) {
     var lines = [word, PHRASES.together], gaps = [0.5, 0.35];
@@ -1325,13 +1277,6 @@ function ttsTexts() {
     var bd = $("buddy"); bd.textContent = R.buddy; bd.className = "buddy";
     $("checkBtn").textContent = "Check";
     for (var i = 0; i < n; i++) { Q.entry.push(null); Q.locked.push(false); Q.wrong.push(false); }
-    Q.ph = phonicsOn() && !it.us && PHONICS[it.w] ? phonGroups(PHONICS[it.w]) : null; Q.marks = []; Q.hl = null;
-    if (Q.ph) Q.ph.forEach(function (g) {   // a dot under one-letter sounds, a bar under letters that share a sound, a linked dot for magic e
-      if (g.magic) { Q.marks[g.idx[0]] = "dot"; Q.marks[g.idx[g.idx.length - 1]] = "mag"; return; }
-      var k = g.idx.length;
-      g.idx.forEach(function (x, j) { Q.marks[x] = k === 1 ? "dot" : j === 0 ? "bs" : j === k - 1 ? "be" : "bm"; });
-    });
-    $("slowBtn").textContent = Q.ph ? "🗣️ Sound it out" : "🐢 Slowly";
     if (Q.tileMode) {
       var extra = it.level <= 2 ? 2 : 3, letters = w.split(""), abc = "abcdefghijklmnoprstuw".split("").filter(function (c) { return w.indexOf(c) === -1; });
       shuffle(abc).slice(0, extra).forEach(function (c) { letters.push(c); });
@@ -1350,7 +1295,7 @@ function ttsTexts() {
     $("hintBtn").textContent = "💡 Hint";
     renderDots(); renderCombo(); renderSlots(); renderTiles();
     var t = R.tok; setTimeout(function () { if (tok === t) speakQ(); }, 350);
-    var nx = R.items[R.i + 1]; if (nx) { var nd = spell(nx); preload(nx.s ? [nd, sentenceOf(nx, nd)] : [nd]); if (phonicsOn() && PHONICS[nx.w]) preload(phonLines(phonGroups(PHONICS[nx.w]))); }
+    var nx = R.items[R.i + 1]; if (nx) { var nd = spell(nx); preload(nx.s ? [nd, sentenceOf(nx, nd)] : [nd]); }
   }
   function react(cls) { var b = $("buddy"); b.className = "buddy"; void b.offsetWidth; b.className = "buddy " + cls; }
   function centerOf(e) { var r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
@@ -1382,34 +1327,8 @@ function ttsTexts() {
     box.appendChild(document.createTextNode(parts[1]));
   }
   function wordInSentence() { var d = Q.disp; return Q.it.s.charAt(0) === "_" ? d.charAt(0).toUpperCase() + d.slice(1) : d; }
-  function phonLines(groups) { return groups.map(function (g) { return phonLine(g.p); }); }
-  function highlight(idx) {   // idx: letter positions to light up, or null
-    if (!Q) return; Q.hl = idx;
-    var bs = $("slots").children;
-    for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("snd", !!idx && idx.indexOf(i) !== -1);
-  }
-  // Sound it out like at school: the word, each pure sound in turn (its letters light up), then the word blended back together
-  function soundOut() {
-    var q = Q, ph = q.ph; if (!ph) { speakQ(true); return; }
-    var all = [], lines = [], spans = [], gaps = [];
-    for (var k = 0; k < q.w.length; k++) all.push(k);
-    if (q.golden && !q.announced) { q.announced = true; lines.push(PHRASES.golden); spans.push(null); gaps.push(0.45); }
-    lines.push(q.disp); spans.push(null); gaps.push(0.55);
-    ph.forEach(function (g) { lines.push(phonLine(g.p)); spans.push(g.idx); gaps.push(0.3); });
-    gaps[gaps.length - 1] = 0.55;
-    lines.push(q.disp); spans.push(all); gaps.push(0.2);
-    var live = function () { return Q === q && $("game").classList.contains("active"); };
-    if (!db.settings.voice) {   // no voice: still show the sounds one by one
-      lines.forEach(function (_, i) { setTimeout(function () { if (live()) highlight(spans[i]); }, i * 650); });
-      setTimeout(function () { if (live()) highlight(null); }, lines.length * 650);
-      return;
-    }
-    say(lines, { gaps: gaps, each: function (i) { if (live()) highlight(spans[i]); }, done: function () { if (live()) highlight(null); },
-      fallback: function () { if (live()) say(q.golden && lines[0] === PHRASES.golden ? [PHRASES.golden, q.disp] : [q.disp], { gap: 0.45 }); } });
-  }
   function speakQ(slow) {
     var it = Q.it;
-    if (Q.ph && !slow) { soundOut(); return; }
     if (slow) { saySlow(Q.disp); return; }
     var lines = it.s ? [Q.disp, sentenceOf(it, Q.disp), Q.disp] : [Q.disp];
     if (Q.golden && !Q.announced) { Q.announced = true; lines.unshift(PHRASES.golden); }
@@ -1436,15 +1355,13 @@ function ttsTexts() {
   }
   function renderSlots() {
     var box = $("slots"), n = Q.w.length, nextIdx = Q.done ? -1 : Q.entry.indexOf(null);
-    box.className = "slots" + (n > 12 ? " xlong" : n > 8 ? " long" : "") + (Q.ph ? " marked" : "");
+    box.className = "slots" + (n > 12 ? " xlong" : n > 8 ? " long" : "");
     box.innerHTML = "";
     for (var i = 0; i < n; i++) (function (i) {
       var e = Q.entry[i], b = el("button", "s"); b.type = "button"; b.style.setProperty("--i", i);
       if (Q.reveal) { b.textContent = Q.disp[i]; b.className += " reveal"; }
       else if (e) { b.textContent = Q.done ? Q.disp[i] : e.ch; b.className += Q.locked[i] ? " locked" : Q.wrong[i] ? " wrong" : " filled"; }
       else if (i === nextIdx) b.className += " next";
-      if (Q.marks && Q.marks[i]) b.className += " m-" + Q.marks[i];
-      if (Q.hl && !Q.done && Q.hl.indexOf(i) !== -1) b.className += " snd";
       b.setAttribute("aria-label", e ? "Letter " + e.ch : "Empty");
       b.addEventListener("click", function () { removeAt(i); });
       box.appendChild(b);
@@ -1708,7 +1625,6 @@ function ttsTexts() {
       sn.appendChild(b);
     });
     seg("segSpell", db.settings.us, function (v) { db.settings.us = v; });
-    seg("segPhonics", phonicsOn(), function (v) { db.settings.phonics = v; });
     $("spellEg").textContent = db.settings.us ? "color, favorite, center" : "colour, favourite, centre";
     var p = P(); $("playerSettings").hidden = !p || $("game").classList.contains("active");
     if (p) { $("setName").textContent = p.name; $("setLvl").textContent = p.level; }
@@ -1734,8 +1650,8 @@ function ttsTexts() {
   $("checkBtn").addEventListener("click", check);
   $("delBtn").addEventListener("click", backspace);
   $("hintBtn").addEventListener("click", hint);
-  $("hearBtn").addEventListener("click", function () { if (!Q) return; if (Q.ph) { highlight(null); say(Q.disp); } else speakQ(); });
-  $("slowBtn").addEventListener("click", function () { if (!Q) return; if (Q.ph) soundOut(); else speakQ(true); });
+  $("hearBtn").addEventListener("click", function () { if (Q) speakQ(); });
+  $("slowBtn").addEventListener("click", function () { if (Q) speakQ(true); });
   $("quitBtn").addEventListener("click", quitRound);
   $("playBtn").addEventListener("click", function () { startRound("quest"); });
   $("playBtn2").addEventListener("click", function () { startRound("quest"); });

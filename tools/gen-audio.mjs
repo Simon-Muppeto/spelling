@@ -16,15 +16,15 @@ const start = html.indexOf("// Word lists");
 const end = html.indexOf("(function () {", start);
 const ctx = {};
 vm.createContext(ctx);
-vm.runInContext(html.slice(start, end) + "\nthis.ttsTexts = ttsTexts; this.vhash = vhash; this.PHONEMES = PHONEMES; this.phonLine = phonLine;", ctx);
+vm.runInContext(html.slice(start, end) + "\nthis.ttsTexts = ttsTexts; this.vhash = vhash;", ctx);
 const texts = ctx.ttsTexts();
 
 // Records every missing line into public/audio/<folder>/, using get(text) -> Response.
-async function record(folder, get, workers, list = texts) {
+async function record(folder, get, workers) {
   const dir = path.join(root, "public/audio", folder);
   fs.mkdirSync(dir, { recursive: true });
-  const todo = list.filter((t) => !fs.existsSync(path.join(dir, ctx.vhash(t) + ".mp3")));
-  console.log(todo.length + " of " + list.length + " clips to record into public/audio/" + folder);
+  const todo = texts.filter((t) => !fs.existsSync(path.join(dir, ctx.vhash(t) + ".mp3")));
+  console.log(todo.length + " of " + texts.length + " clips to record into public/audio/" + folder);
   let done = 0, failed = [];
   async function one(t) {
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -70,19 +70,6 @@ if (mode === "texts") {
     headers: { "xi-api-key": key, "content-type": "application/json", accept: "audio/mpeg" },
     body: JSON.stringify({ text: t, model_id: model, voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.3, use_speaker_boost: true } })
   }), 2);
-} else if (mode === "phonics") {
-  // Pure phonics sounds (one per phoneme) with ElevenLabs IPA phoneme tags: node tools/gen-audio.mjs phonics [voice-id]
-  let key = process.env.ELEVENLABS_API_KEY;
-  try { if (!key) key = (fs.readFileSync(path.join(root, ".env.local"), "utf8").match(/ELEVENLABS_API_KEY\s*=\s*["']?([^\s"']+)/) || [])[1]; } catch (e) {}
-  const voiceId = a || "pFZP5JQG7iQjIQuC4Bku";
-  if (!key) { console.log("Set ELEVENLABS_API_KEY or put it in .env.local"); process.exit(1); }
-  const codes = Object.keys(ctx.PHONEMES), byLine = {};
-  codes.forEach((c) => { byLine[ctx.phonLine(c)] = c; });
-  await record("phonics", (line) => fetch("https://api.elevenlabs.io/v1/text-to-speech/" + voiceId + "?output_format=mp3_44100_64", {
-    method: "POST",
-    headers: { "xi-api-key": key, "content-type": "application/json", accept: "audio/mpeg" },
-    body: JSON.stringify({ text: '<phoneme alphabet="ipa" ph="' + ctx.PHONEMES[byLine[line]] + '">' + byLine[line] + "</phoneme>", model_id: "eleven_flash_v2", voice_settings: { stability: 0.6, similarity_boost: 0.75 } })
-  }), 2, Object.keys(byLine));
 } else {
-  console.log("usage: node tools/gen-audio.mjs texts | fetch [base-url] [voice] | eleven <folder> <voice-id> [model] | phonics [voice-id]");
+  console.log("usage: node tools/gen-audio.mjs texts | fetch [base-url] [voice] | eleven <folder> <voice-id> [model]");
 }
